@@ -7,6 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
   <style>
     :root {
       --bg-main: #fcfcfc;
@@ -491,6 +494,11 @@
       border-left: 4px solid var(--gold);
       margin: 10px 0;
       font-variant-numeric: tabular-nums;
+      overflow-x: auto;
+    }
+
+    .formula-block .katex-display {
+      margin: 6px 0 2px;
     }
 
     @media (max-width: 920px) {
@@ -513,7 +521,7 @@
     </div>
     <div class="nav-links">
       <a href="#section-heatloss" class="nav-link">1. Механізми тепловтрат</a>
-      <a href="#section-emissivity" class="nav-link">2. Похибка тепловізора (ε)</a>
+      <a href="#section-emissivity" class="nav-link">2. Похибка тепловізора ($\varepsilon$)</a>
       <a href="#section-newton" class="nav-link">3. Закон Ньютона та Інтеграл</a>
       <a href="index.html" class="btn-back">← До лабораторного журналу</a>
     </div>
@@ -531,7 +539,7 @@
       <div class="hero-pills">
         <span class="hero-pill">🌡️ Випаровування та конвекція</span>
         <span class="hero-pill">🧱 Термічний опір стінки та підставки</span>
-        <span class="hero-pill">📡 Закон Стефана–Больцмана та Емісивність ε</span>
+        <span class="hero-pill">📡 Закон Стефана–Больцмана та Емісивність $\varepsilon$</span>
         <span class="hero-pill">📉 Закон охолодження Ньютона</span>
       </div>
     </section>
@@ -662,7 +670,7 @@
           <div class="loss-bars-box">
             <div class="bar-row">
               <div class="bar-label">
-                <span>Потужність тепловтрат неутепленої чашки (при T = 85 °C):</span>
+                <span>Потужність тепловтрат неутепленої чашки (при $T = 85^\circ\text{C}$):</span>
                 <span style="color: var(--primary);" id="uninsPowerText">≈ 48 Вт (100%)</span>
               </div>
               <div class="bar-track">
@@ -690,7 +698,7 @@
             </h3>
             <p>
               Найбільший канал втрати енергії відкритої чашки з окропом — це фазовий перехід води в пару
-              (питома теплота пароутворення становить <b>r ≈ 2260 кДж/кг</b>!). Навіть випаровування лише 5 грамів води
+              (питома теплота пароутворення становить $r \approx 2260\text{ кДж/кг}$!). Навіть випаровування лише 5 грамів води
               забирає понад <b>11.3 кДж</b> тепла. Коли ми накриваємо чашку <b>блюдцем</b>, водяна пара конденсується
               на нижній поверхні блюдця, повертаючи тепло назад, а повітряний прошарок зупиняє конвективні потоки.
             </p>
@@ -702,10 +710,10 @@
               <span class="share-pill" style="background: var(--gold-soft); color: var(--gold-dark);">15–20% втрат</span>
             </h3>
             <p>
-              За законом Фур'є густина теплового потоку дорівнює <b>q = −λ · (dT/dx)</b>. Масивна стільниця має високу
+              За законом Фур'є густина теплового потоку дорівнює $q = -\lambda \cdot \frac{dT}{dx}$. Масивна стільниця має високу
               теплоємність і теплопровідність, тому активно відбирає тепло від дна чашки. <b>Гофрований картон</b> містить
-              замкнені повітряні пори з низьким коефіцієнтом теплопровідності (<b>λ ≈ 0.06–0.08 Вт/(м·К)</b> проти ~0.8–1.5 у кераміки/дерева),
-              створюючи високий термічний опір <b>R = δ / λ</b>.
+              замкнені повітряні пори з низьким коефіцієнтом теплопровідності ($\lambda \approx 0.06\text{–}0.08\text{ Вт/(м}\cdot\text{К)}$ проти ~0.8–1.5 у кераміки/дерева),
+              створюючи високий термічний опір $R = \frac{\delta}{\lambda}$.
             </p>
           </div>
 
@@ -716,8 +724,8 @@
             </h3>
             <p>
               Бічні стінки чашки віддають тепло навколишньому повітрю шляхом природної конвекції
-              (<b>q<sub>конв</sub> = α · (T<sub>ст</sub> − T<sub>навк</sub>)</b>) та інфрачервоного випромінювання за законом
-              Стефана–Больцмана: <b>q<sub>випр</sub> = ε · σ · (T<sub>ст</sub>⁴ − T<sub>навк</sub>⁴)</b>. Саме це інфрачервоне
+              ($q_{\text{конв}} = \alpha \cdot (T_{\text{ст}} - T_{\text{навк}})$) та інфрачервоного випромінювання за законом
+              Стефана–Больцмана: $q_{\text{випр}} = \varepsilon \cdot \sigma \cdot (T_{\text{ст}}^4 - T_{\text{навк}}^4)$. Саме це інфрачервоне
               випромінювання у діапазоні 8–14 мкм і реєструє матриця тепловізора!
             </p>
           </div>
@@ -792,8 +800,8 @@
           </svg>
 
           <div class="formula-block">
-            <b>Основне рівняння радіометрії тепловізора:</b><br/>
-            W<sub>сум</sub> = ε · σ · T<sub>поверхні</sub>⁴ + (1 − ε) · σ · T<sub>навк</sub>⁴
+            <b>Основне рівняння радіометрії тепловізора:</b>
+            $$W_{\text{сум}} = \varepsilon \cdot \sigma \cdot T_{\text{поверхні}}^4 + (1 - \varepsilon) \cdot \sigma \cdot T_{\text{навк}}^4$$
           </div>
         </div>
 
@@ -803,13 +811,13 @@
             🎛️ Інтерактивний симулятор: Похибка безконтактного вимірювання
           </h3>
           <p style="font-size: 13px; color: var(--text-muted);">
-            Змінюйте параметри стінки чашки та коефіцієнт випромінювання <b>ε</b>, щоб побачити, як формується різниця
-            між показами термопари (T₃) та тепловізора (T₂):
+            Змінюйте параметри стінки чашки та коефіцієнт випромінювання $\varepsilon$, щоб побачити, як формується різниця
+            між показами термопари ($T_3$) та тепловізора ($T_2$):
           </p>
 
           <div class="slider-group">
             <div class="slider-header">
-              <span>Температура води всередині чашки (Термопара T₃):</span>
+              <span>Температура води всередині чашки (Термопара $T_3$):</span>
               <span class="slider-val" id="simWaterVal">90.0 °C</span>
             </div>
             <input type="range" id="simWaterInput" min="30" max="100" step="0.5" value="90" />
@@ -817,7 +825,7 @@
 
           <div class="slider-group">
             <div class="slider-header">
-              <span>Перепад температури на стінці чашки (ΔT<sub>стінки</sub>):</span>
+              <span>Перепад температури на стінці чашки ($\Delta T_{\text{стінки}}$):</span>
               <span class="slider-val" id="simWallDropVal">2.5 °C</span>
             </div>
             <input type="range" id="simWallDropInput" min="0" max="10" step="0.5" value="2.5" />
@@ -825,21 +833,21 @@
 
           <div class="slider-group">
             <div class="slider-header">
-              <span>Дійсний коефіцієнт випромінювання поверхні чашки (ε<sub>дійсн</sub>):</span>
+              <span>Дійсний коефіцієнт випромінювання поверхні чашки ($\varepsilon_{\text{дійсн}}$):</span>
               <span class="slider-val" id="simEpsRealVal">0.88</span>
             </div>
             <input type="range" id="simEpsRealInput" min="0.15" max="0.98" step="0.01" value="0.88" />
             <div class="preset-btns">
-              <button class="preset-btn" data-eps="0.94" data-drop="2.0">Матова кераміка (ε=0.94)</button>
-              <button class="preset-btn" data-eps="0.86" data-drop="2.5">Глянцева глазур (ε=0.86)</button>
-              <button class="preset-btn" data-eps="0.60" data-drop="1.5">Світла емаль (ε=0.60)</button>
-              <button class="preset-btn" data-eps="0.22" data-drop="0.5">Полірована сталь (ε=0.22)</button>
+              <button class="preset-btn" data-eps="0.94" data-drop="2.0">Матова кераміка ($\varepsilon=0.94$)</button>
+              <button class="preset-btn" data-eps="0.86" data-drop="2.5">Глянцева глазур ($\varepsilon=0.86$)</button>
+              <button class="preset-btn" data-eps="0.60" data-drop="1.5">Світла емаль ($\varepsilon=0.60$)</button>
+              <button class="preset-btn" data-eps="0.22" data-drop="0.5">Полірована сталь ($\varepsilon=0.22$)</button>
             </div>
           </div>
 
           <div class="slider-group">
             <div class="slider-header">
-              <span>Встановлений у налаштуваннях тепловізора ε<sub>камери</sub>:</span>
+              <span>Встановлений у налаштуваннях тепловізора $\varepsilon_{\text{камери}}$:</span>
               <span class="slider-val" id="simEpsCamVal">0.95</span>
             </div>
             <input type="range" id="simEpsCamInput" min="0.50" max="1.00" step="0.01" value="0.95" />
@@ -847,7 +855,7 @@
 
           <div class="sim-readouts">
             <div class="readout-box r-ref">
-              <div class="readout-label">Термопара (T₃)</div>
+              <div class="readout-label">Термопара ($T_3$)</div>
               <div class="readout-num" style="color: var(--primary);" id="outThermocouple">90.0 °C</div>
             </div>
             <div class="readout-box r-wall">
@@ -855,13 +863,13 @@
               <div class="readout-num" style="color: var(--gold-dark);" id="outSurface">87.5 °C</div>
             </div>
             <div class="readout-box r-cam">
-              <div class="readout-label">Тепловізор (T₂)</div>
+              <div class="readout-label">Тепловізор ($T_2$)</div>
               <div class="readout-num" style="color: var(--cyan-dark);" id="outCamera">83.9 °C</div>
             </div>
           </div>
 
           <div style="background: var(--primary-soft); border-left: 4px solid var(--primary); padding: 10px 12px; border-radius: 6px; font-size: 13px;">
-            <b>Сумарна розбіжність (T₃ − T₂): <span id="outTotalError" style="color: var(--primary);">+6.1 °C</span></b>
+            <b>Сумарна розбіжність ($T_3 - T_2$): <span id="outTotalError" style="color: var(--primary);">+6.1 °C</span></b>
             <div style="font-size: 12px; color: var(--dark-soft); margin-top: 3px;" id="outErrorBreakdown">
               Із них 2.5 °C — через термічний опір керамічної стінки, та 3.6 °C — оптична похибка емісивності й відбиття холодного фону кімнати (20 °C).
             </div>
@@ -883,29 +891,28 @@
             Чому крива охолодження є експонентою?
           </h3>
           <p style="margin-bottom: 10px; color: var(--dark-soft);">
-            Швидкість втрати теплоти тілом прямо пропорційна різниці температур між поверхнею тіла <b>T(t)</b>
-            та навколишнім середовищем <b>T<sub>навк</sub></b> (закон Ньютона–Ріхмана):
+            Швидкість втрати теплоти тілом прямо пропорційна різниці температур між поверхнею тіла $T(t)$
+            та навколишнім середовищем $T_{\text{навк}}$ (закон Ньютона–Ріхмана):
           </p>
           <div class="formula-block">
-            dT / dt = −k · (T(t) − T<sub>навк</sub>) &nbsp;&nbsp;⇒&nbsp;&nbsp;
-            <b>T(t) = T<sub>навк</sub> + (T₀ − T<sub>навк</sub>) · e<sup>−k·t</sup></b>
+            $$\frac{dT}{dt} = -k \cdot (T(t) - T_{\text{навк}}) \quad \Longrightarrow \quad T(t) = T_{\text{навк}} + (T_0 - T_{\text{навк}}) \cdot e^{-k \cdot t}$$
           </div>
           <p style="margin-bottom: 12px; color: var(--dark-soft);">
-            Коефіцієнт охолодження <b>k = (α · F) / (m · c)</b> [хв⁻¹] залежить від коефіцієнта тепловіддачі <b>α</b>,
-            площі поверхні <b>F</b> та теплоємності води <b>m·c</b>. Спочатку, коли окріп має 90–95 °C, температурний
-            напір ΔT максимальний, тому температура падає стрімко. У міру наближення до T<sub>навк</sub> графік стає пологішим.
+            Коефіцієнт охолодження $k = \frac{\alpha \cdot F}{m \cdot c}\;[\text{хв}^{-1}]$ залежить від коефіцієнта тепловіддачі $\alpha$,
+            площі поверхні $F$ та теплоємності води $m \cdot c$. Спочатку, коли окріп має 90–95 °C, температурний
+            напір $\Delta T$ максимальний, тому температура падає стрімко. У міру наближення до $T_{\text{навк}}$ графік стає пологішим.
           </p>
 
           <h3 style="font-size: 16.5px; font-weight: 700; margin-bottom: 8px;">
-            Фізичний зміст площі під графіком S = ∫(T(t) − T<sub>навк</sub>)dt
+            Фізичний зміст площі під графіком $S = \int (T(t) - T_{\text{навк}})\,dt$
           </h3>
           <p style="color: var(--dark-soft);">
-            Миттєвий тепловий потік з поверхні в довкілля становить <b>q(t) = K · (T(t) − T<sub>навк</sub>)</b>.
-            Інтегруючи цей вираз за часом від <b>t = 0</b> до <b>t<sub>кін</sub></b>, отримуємо величину, пропорційну
+            Миттєвий тепловий потік з поверхні в довкілля становить $q(t) = K \cdot (T(t) - T_{\text{навк}})$.
+            Інтегруючи цей вираз за часом від $t = 0$ до $t_{\text{кін}}$, отримуємо величину, пропорційну
             сумарній кількості відданої теплової енергії:
           </p>
           <div class="formula-block" style="border-left-color: var(--cyan);">
-            Q<sub>втрач</sub> ∝ ∫<sub>0</sub><sup>t_кін</sup> (T(t) − T<sub>навк</sub>) dt &nbsp;[°C · хв]
+            $$Q_{\text{втрач}} \propto \int_{0}^{t_{\text{кін}}} (T(t) - T_{\text{навк}})\,dt \quad [{}^{\circ}\text{C} \cdot \text{хв}]$$
           </div>
         </div>
 
@@ -915,8 +922,8 @@
           </h3>
           <ul style="padding-left: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 13.5px; color: var(--dark-soft);">
             <li>
-              <b>Порівняння коефіцієнтів охолодження k:</b> у чашки з блюдцем та картонною підставкою коефіцієнт <b>k₁</b>
-              є суттєво меншим за <b>k₂</b> неутепленої чашки, що свідчить про зниження сумарного коефіцієнта теплопередачі.
+              <b>Порівняння коефіцієнтів охолодження $k$:</b> у чашки з блюдцем та картонною підставкою коефіцієнт $k_1$
+              є суттєво меншим за $k_2$ неутепленої чашки, що свідчить про зниження сумарного коефіцієнта теплопередачі.
             </li>
             <li>
               <b>Інтеграл температурного напору (площа під графіком):</b> чисельне інтегрування методом трапецій дозволяє
@@ -924,7 +931,7 @@
             </li>
             <li>
               <b>Похибка тепловізора відносно термопари:</b> для коректного безконтактного вимірювання енергоаудитор
-              повинен вводити в меню тепловізора правильний коефіцієнт випромінювання матеріалу <b>ε</b> (для глазурованої
+              повинен вводити в меню тепловізора правильний коефіцієнт випромінювання матеріалу $\varepsilon$ (для глазурованої
               кераміки 0.88–0.92) та враховувати відбиту температуру навколишніх предметів.
             </li>
           </ul>
@@ -1040,7 +1047,21 @@
         });
       });
 
+      function renderAllMath() {
+        if (window.renderMathInElement) {
+          window.renderMathInElement(document.body, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false }
+            ],
+            throwOnError: false
+          });
+        }
+      }
+
+      window.addEventListener('load', renderAllMath);
       updateSimulator();
+      renderAllMath();
     })();
   </script>
 </body>

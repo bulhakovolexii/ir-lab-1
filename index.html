@@ -7,6 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
   <style>
     :root {
       --bg-main: #fcfcfc;
@@ -754,14 +757,18 @@
     .formula-tag {
       font-size: 10.5px;
       background: #f4f4f4;
-      padding: 1px 6px;
+      padding: 2px 6px;
       border-radius: 4px;
       color: var(--dark);
-      font-weight: 600;
+      font-weight: 500;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       font-variant-numeric: tabular-nums;
+    }
+
+    .katex {
+      font-size: 1.02em !important;
     }
 
     /* MODAL POPUP FOR DATA CLEARING */
@@ -881,7 +888,7 @@
         </div>
 
         <div class="param-field" title="Температура повітря в приміщенні (вважається сталою під час досліду)">
-          <label for="ambientInput">T<sub>навк</sub>:</label>
+          <label for="ambientInput">$T_{\text{навк}}$:</label>
           <input type="number" id="ambientInput" value="20" min="-10" max="50" step="0.5" />
           <span class="param-unit">°C</span>
         </div>
@@ -895,7 +902,6 @@
           <span>Наступний замір:</span>
           <span class="timer-countdown" id="timerCountdown">--:--</span>
           <button class="sound-btn" id="soundToggleBtn" title="Увімкнути/вимкнути звуковий сигнал таймера">🔔 Звук</button>
-          <button class="sound-btn" id="testAlarmBtn" title="Перевірити гучність будильника">🔊 Тест</button>
         </div>
       </div>
 
@@ -933,20 +939,20 @@
                 <th style="width: 42px;">№</th>
                 <th style="width: 96px;">Час<span class="th-sub">ГГ:ХХ:СС (хв)</span></th>
                 <th class="col-t1">
-                  <span class="th-badge" style="background: var(--gold);"></span>T₁ Утеплена
+                  <span class="th-badge" style="background: var(--gold);"></span>$T_1$ Утеплена
                   <span class="th-sub">Тепловізор, °C</span>
                 </th>
                 <th class="col-t2">
-                  <span class="th-badge" style="background: var(--cyan);"></span>T₂ Неутеплена
+                  <span class="th-badge" style="background: var(--cyan);"></span>$T_2$ Неутеплена
                   <span class="th-sub">Тепловізор, °C</span>
                 </th>
                 <th class="col-t3">
-                  <span class="th-badge" style="background: var(--primary);"></span>T₃ Неутеплена
+                  <span class="th-badge" style="background: var(--primary);"></span>$T_3$ Неутеплена
                   <span class="th-sub">Термопара (реф.), °C</span>
                 </th>
                 <th style="width: 68px;" title="Різниця між референсною термопарою та тепловізором на неутепленій чашці (T₃ - T₂)">
-                  ΔT<sub>пох</sub>
-                  <span class="th-sub">T₃ − T₂, °C</span>
+                  $\Delta T_{\text{пох}}$
+                  <span class="th-sub">$T_3 - T_2$, °C</span>
                 </th>
               </tr>
             </thead>
@@ -967,10 +973,10 @@
         <div class="panel chart-panel">
           <div class="panel-header">
             <div class="panel-title">
-              <span>Криві охолодження T(t) та апроксимація за законом Ньютона</span>
+              <span>Криві охолодження $T(t)$ та апроксимація за законом Ньютона</span>
             </div>
             <span style="font-size: 11.5px; color: var(--text-muted);">
-              Суцільні — виміри | Пунктирні — тренд T(t) = T<sub>навк</sub> + ΔT₀·e<sup>−k·t</sup>
+              Суцільні — виміри | Пунктирні — тренд $T(t) = T_{\text{навк}} + \Delta T_0 \cdot e^{-k \cdot t}$
             </span>
           </div>
 
@@ -978,15 +984,15 @@
             <div class="legend-items">
               <span class="legend-item" data-series="t1">
                 <span class="legend-line" style="background: var(--gold);"></span>
-                <span>T₁ Утеплена (Тепловізор)</span>
+                <span>$T_1$ Утеплена (Тепловізор)</span>
               </span>
               <span class="legend-item" data-series="t2">
                 <span class="legend-line" style="background: var(--cyan);"></span>
-                <span>T₂ Неутеплена (Тепловізор)</span>
+                <span>$T_2$ Неутеплена (Тепловізор)</span>
               </span>
               <span class="legend-item" data-series="t3">
                 <span class="legend-line" style="background: var(--primary);"></span>
-                <span>T₃ Термопара (Референс)</span>
+                <span>$T_3$ Термопара (Референс)</span>
               </span>
               <span class="legend-item" data-series="trends">
                 <span class="legend-line dashed" style="color: var(--dark);"></span>
@@ -1008,29 +1014,29 @@
           <div class="stat-card card-gold">
             <div class="stat-header">
               <span>Площа під графіком (ІЧ)</span>
-              <span class="stat-header-badge" title="Інтеграл надлишкової температури ∫(T(t) - T_навк)dt за методом трапецій">∫(T − T<sub>навк</sub>)dt</span>
+              <span class="stat-header-badge" title="Інтеграл надлишкової температури ∫(T(t) - T_навк)dt за методом трапецій">$\int (T - T_{\text{навк}})\,dt$</span>
             </div>
             <div class="stat-main-row">
               <div>
-                <div style="font-size: 10.5px; color: var(--text-muted);">Різниця площ S₁ vs S₂:</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Різниця площ $S_1$ vs $S_2$:</div>
                 <div class="stat-big-value highlight-primary" id="areaSavingsPercent">— %</div>
               </div>
               <div style="text-align: right;">
-                <div style="font-size: 10.5px; color: var(--text-muted);">Економія ΔT охолодж.:</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Економія $\Delta T$ охолодж.:</div>
                 <div style="font-size: 15px; font-weight: 700; color: var(--dark);" id="tempDropSaving">— %</div>
               </div>
             </div>
             <div class="stat-sub-rows">
               <div class="stat-row-item">
-                <span><b style="color: var(--gold-dark);">■</b> S₁ (Утеплена, над T<sub>навк</sub>):</span>
+                <span><b style="color: var(--gold-dark);">■</b> $S_1$ (Утеплена, над $T_{\text{навк}}$):</span>
                 <strong id="areaT1Val">— °C·хв</strong>
               </div>
               <div class="stat-row-item">
-                <span><b style="color: var(--cyan-dark);">■</b> S₂ (Неутеплена, над T<sub>навк</sub>):</span>
+                <span><b style="color: var(--cyan-dark);">■</b> $S_2$ (Неутеплена, над $T_{\text{навк}}$):</span>
                 <strong id="areaT2Val">— °C·хв</strong>
               </div>
               <div class="stat-row-item" style="color: var(--text-muted); font-size: 10.5px;">
-                <span>Повна ∫T(t)dt (S₁ / S₂):</span>
+                <span>Повна $\int T(t)\,dt$ ($S_1 / S_2$):</span>
                 <span id="rawAreaVal">— / —</span>
               </div>
             </div>
@@ -1045,21 +1051,21 @@
             <div class="stat-sub-rows" style="gap: 2px;">
               <div class="trend-item-row">
                 <div class="trend-item-top">
-                  <span><b style="color: var(--gold-dark);">● T₁ Утепл.:</b></span>
+                  <span><b style="color: var(--gold-dark);">●</b> <b>$T_1$ Утепл.:</b></span>
                   <span id="r2T1" style="color: var(--text-muted);">R² = —</span>
                 </div>
                 <div class="formula-tag" id="eqT1">Недостатньо точок (мін. 2)</div>
               </div>
               <div class="trend-item-row">
                 <div class="trend-item-top">
-                  <span><b style="color: var(--cyan-dark);">● T₂ Неутепл.:</b></span>
+                  <span><b style="color: var(--cyan-dark);">●</b> <b>$T_2$ Неутепл.:</b></span>
                   <span id="r2T2" style="color: var(--text-muted);">R² = —</span>
                 </div>
                 <div class="formula-tag" id="eqT2">Недостатньо точок (мін. 2)</div>
               </div>
               <div class="trend-item-row">
                 <div class="trend-item-top">
-                  <span><b style="color: var(--primary);">● T₃ Термоп.:</b></span>
+                  <span><b style="color: var(--primary);">●</b> <b>$T_3$ Термоп.:</b></span>
                   <span id="r2T3" style="color: var(--text-muted);">R² = —</span>
                 </div>
                 <div class="formula-tag" id="eqT3">Недостатньо точок (мін. 2)</div>
@@ -1070,30 +1076,30 @@
           <!-- CARD 3: CONTACTLESS MEASUREMENT ACCURACY -->
           <div class="stat-card card-primary">
             <div class="stat-header">
-              <span>Точність ІЧ (T₃ vs T₂)</span>
+              <span>Точність ІЧ ($T_3$ vs $T_2$)</span>
               <span class="stat-header-badge">Неутеплена</span>
             </div>
             <div class="stat-main-row">
               <div>
-                <div style="font-size: 10.5px; color: var(--text-muted);">Сер. абс. похибка |ΔT|:</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Сер. абс. похибка $|\Delta T|$:</div>
                 <div class="stat-big-value highlight-cyan" id="maeVal">— °C</div>
               </div>
               <div style="text-align: right;">
-                <div style="font-size: 10.5px; color: var(--text-muted);">Відносна похибка δ:</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Відносна похибка $\delta$:</div>
                 <div style="font-size: 15.5px; font-weight: 700; color: var(--primary);" id="mapeVal">— %</div>
               </div>
             </div>
             <div class="stat-sub-rows">
               <div class="stat-row-item">
-                <span>ΔT₁ (Утеплена):</span>
+                <span>$\Delta T_1$ (Утеплена):</span>
                 <strong id="dropT1Val">— °C</strong>
               </div>
               <div class="stat-row-item">
-                <span>ΔT₂ (Неутеплена):</span>
+                <span>$\Delta T_2$ (Неутеплена):</span>
                 <strong id="dropT2Val">— °C</strong>
               </div>
               <div class="stat-row-item" style="font-size: 10.5px; color: var(--text-muted);">
-                <span>Оцінка ε поверхні (за T₂/T₃):</span>
+                <span>Оцінка $\varepsilon$ поверхні (за $T_2/T_3$):</span>
                 <strong id="emissivityEstVal" style="color: var(--dark);">—</strong>
               </div>
             </div>
@@ -1142,7 +1148,6 @@
       const timerWidget = document.getElementById('timerWidget');
       const timerCountdown = document.getElementById('timerCountdown');
       const soundToggleBtn = document.getElementById('soundToggleBtn');
-      const testAlarmBtn = document.getElementById('testAlarmBtn');
 
       // Analytics DOM
       const areaSavingsPercent = document.getElementById('areaSavingsPercent');
@@ -1278,7 +1283,7 @@
         }
       }
 
-      // Shared AudioContext for loud alarm clock signal (3 beeps + pause + 3 beeps)
+      // Shared AudioContext for loud alarm signal: pattern н-в-н-в-н-в (low-high-low-high-low-high)
       let sharedAudioCtx = null;
 
       function getAudioContext() {
@@ -1293,20 +1298,34 @@
         return sharedAudioCtx;
       }
 
-      function playNotificationBeep(forcePlay = false) {
-        if (!state.soundEnabled && !forcePlay) return;
+      function renderLatex(el, latexStr, fallbackStr) {
+        if (!el) return;
+        if (window.katex) {
+          try {
+            window.katex.render(latexStr, el, { throwOnError: false });
+            return;
+          } catch (_) {}
+        }
+        el.textContent = fallbackStr || latexStr;
+      }
+
+      function playNotificationBeep() {
+        if (!state.soundEnabled) return;
         try {
           const actx = getAudioContext();
           if (!actx) return;
 
-          // Digital alarm pattern: 3 beeps, pause, 3 beeps
-          const beepOffsets = [
-            0.00, 0.17, 0.34,
-            0.82, 0.99, 1.16
+          // Pattern: н-в-н-в-н-в (6 alternating low-high notes)
+          const LOW_FREQ = 783.99;  // G5 (н - низька нота)
+          const HIGH_FREQ = 1174.66; // D6 (в - висока нота)
+          const patternFreqs = [
+            LOW_FREQ, HIGH_FREQ,
+            LOW_FREQ, HIGH_FREQ,
+            LOW_FREQ, HIGH_FREQ
           ];
-          const beepDuration = 0.11;
+          const noteDuration = 0.14;
+          const noteStep = 0.16;
 
-          // Compressor to make the alarm loud, punchy and distortion-free
           const compressor = actx.createDynamicsCompressor();
           compressor.threshold.setValueAtTime(-14, actx.currentTime);
           compressor.knee.setValueAtTime(10, actx.currentTime);
@@ -1315,20 +1334,18 @@
           compressor.release.setValueAtTime(0.08, actx.currentTime);
           compressor.connect(actx.destination);
 
-          beepOffsets.forEach((offset, idx) => {
-            const startTime = actx.currentTime + offset;
-            const stopTime = startTime + beepDuration;
+          patternFreqs.forEach((freq, idx) => {
+            const startTime = actx.currentTime + idx * noteStep;
+            const stopTime = startTime + noteDuration;
 
             const osc1 = actx.createOscillator();
             const osc2 = actx.createOscillator();
             const gain = actx.createGain();
 
-            // Crisp alarm frequencies (C6 + G6 / C7)
             osc1.type = 'triangle';
             osc2.type = 'square';
-            const baseFreq = idx >= 3 ? 1174.66 : 1046.50; // Second burst slightly higher pitch
-            osc1.frequency.setValueAtTime(baseFreq, startTime);
-            osc2.frequency.setValueAtTime(baseFreq * 2, startTime);
+            osc1.frequency.setValueAtTime(freq, startTime);
+            osc2.frequency.setValueAtTime(freq * 2, startTime);
 
             gain.gain.setValueAtTime(0.001, startTime);
             gain.gain.linearRampToValueAtTime(0.65, startTime + 0.01);
@@ -1336,7 +1353,7 @@
             gain.gain.exponentialRampToValueAtTime(0.001, stopTime);
 
             const osc2Gain = actx.createGain();
-            osc2Gain.gain.setValueAtTime(0.28, startTime);
+            osc2Gain.gain.setValueAtTime(0.25, startTime);
 
             osc1.connect(gain);
             osc2.connect(osc2Gain);
@@ -1624,7 +1641,9 @@
             const r2 = ssTot > 1e-9 ? Math.max(0, 1 - ssRes / ssTot) : 1;
 
             const kSign = k >= 0 ? `−${Math.abs(k).toFixed(4)}` : `+${Math.abs(k).toFixed(4)}`;
+            const kLatexSign = k >= 0 ? `-${Math.abs(k).toFixed(4)}` : `+${Math.abs(k).toFixed(4)}`;
             const formulaStr = `T(t) = ${tAmb.toFixed(1)} + ${dT0.toFixed(1)}·e^(${kSign}·t)`;
+            const latexStr = `T(t) = ${tAmb.toFixed(1)} + ${dT0.toFixed(1)} \\cdot e^{${kLatexSign} t}`;
 
             return {
               type: 'newton',
@@ -1633,7 +1652,8 @@
               k,
               r2,
               predict,
-              formulaStr
+              formulaStr,
+              latexStr
             };
           }
         }
@@ -1665,13 +1685,15 @@
             }
             const r2 = ssTot > 1e-9 ? Math.max(0, 1 - ssRes / ssTot) : 1;
             const kSign = k >= 0 ? `−${Math.abs(k).toFixed(4)}` : `+${Math.abs(k).toFixed(4)}`;
+            const kLatexSign = k >= 0 ? `-${Math.abs(k).toFixed(4)}` : `+${Math.abs(k).toFixed(4)}`;
             return {
               type: 'exp',
               dT0: A,
               k,
               r2,
               predict,
-              formulaStr: `T(t) = ${A.toFixed(1)}·e^(${kSign}·t)`
+              formulaStr: `T(t) = ${A.toFixed(1)}·e^(${kSign}·t)`,
+              latexStr: `T(t) = ${A.toFixed(1)} \\cdot e^{${kLatexSign} t}`
             };
           }
         }
@@ -1702,29 +1724,29 @@
         const fit2 = fitNewtonCooling(pts2, tAmb);
         const fit3 = fitNewtonCooling(pts3, tAmb);
 
-        // Update Trend Cards
+        // Update Trend Cards with KaTeX rendering
         if (fit1) {
-          eqT1.textContent = fit1.formulaStr;
-          r2T1.textContent = `R²=${fit1.r2.toFixed(3)} | k=${fit1.k.toFixed(4)}`;
+          renderLatex(eqT1, fit1.latexStr, fit1.formulaStr);
+          renderLatex(r2T1, `R^2=${fit1.r2.toFixed(3)} \\;\\vert\\; k=${fit1.k.toFixed(4)}`, `R²=${fit1.r2.toFixed(3)} | k=${fit1.k.toFixed(4)}`);
         } else {
           eqT1.textContent = 'Недостатньо точок (мін. 2)';
-          r2T1.textContent = 'R² = —';
+          renderLatex(r2T1, `R^2 = \\text{—}`, 'R² = —');
         }
 
         if (fit2) {
-          eqT2.textContent = fit2.formulaStr;
-          r2T2.textContent = `R²=${fit2.r2.toFixed(3)} | k=${fit2.k.toFixed(4)}`;
+          renderLatex(eqT2, fit2.latexStr, fit2.formulaStr);
+          renderLatex(r2T2, `R^2=${fit2.r2.toFixed(3)} \\;\\vert\\; k=${fit2.k.toFixed(4)}`, `R²=${fit2.r2.toFixed(3)} | k=${fit2.k.toFixed(4)}`);
         } else {
           eqT2.textContent = 'Недостатньо точок (мін. 2)';
-          r2T2.textContent = 'R² = —';
+          renderLatex(r2T2, `R^2 = \\text{—}`, 'R² = —');
         }
 
         if (fit3) {
-          eqT3.textContent = fit3.formulaStr;
-          r2T3.textContent = `R²=${fit3.r2.toFixed(3)} | k=${fit3.k.toFixed(4)}`;
+          renderLatex(eqT3, fit3.latexStr, fit3.formulaStr);
+          renderLatex(r2T3, `R^2=${fit3.r2.toFixed(3)} \\;\\vert\\; k=${fit3.k.toFixed(4)}`, `R²=${fit3.r2.toFixed(3)} | k=${fit3.k.toFixed(4)}`);
         } else {
           eqT3.textContent = 'Недостатньо точок (мін. 2)';
-          r2T3.textContent = 'R² = —';
+          renderLatex(r2T3, `R^2 = \\text{—}`, 'R² = —');
         }
 
         // Areas under curves (excess temperature above T_amb and raw integral)
@@ -2173,7 +2195,7 @@
         if (firstInput) firstInput.focus();
       });
 
-      // Sound toggle & test alarm button
+      // Sound toggle
       soundToggleBtn.addEventListener('click', () => {
         state.soundEnabled = !state.soundEnabled;
         if (state.soundEnabled) {
@@ -2182,12 +2204,6 @@
         saveState();
         updateHeaderStatusAndCounts();
       });
-
-      if (testAlarmBtn) {
-        testAlarmBtn.addEventListener('click', () => {
-          playNotificationBeep(true);
-        });
-      }
 
       // Demo Data Generator (Realistic cooling curves for insulated vs uninsulated cup + thermocouple)
       demoDataBtn.addEventListener('click', () => {
@@ -2317,11 +2333,27 @@
         drawChart();
       });
 
+      function initMathRendering() {
+        if (window.renderMathInElement) {
+          window.renderMathInElement(document.body, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false }
+            ],
+            throwOnError: false
+          });
+        }
+        recalculateAndDraw();
+      }
+
+      window.addEventListener('load', initMathRendering);
+
       // INITIALIZE APP
       loadState();
       renderTable();
       recalculateAndDraw();
       startTimerLoop();
+      initMathRendering();
     })();
   </script>
 </body>
