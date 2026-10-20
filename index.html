@@ -240,6 +240,7 @@
       position: relative;
       display: flex;
       align-items: center;
+      margin-left: auto;
     }
 
     .burger-btn {
@@ -298,7 +299,9 @@
       position: absolute;
       top: calc(100% + 8px);
       right: 0;
+      left: auto;
       width: 280px;
+      max-width: calc(100vw - 28px);
       background: var(--bg-card);
       color: var(--dark);
       border: 1px solid var(--border-strong);
@@ -311,6 +314,11 @@
       gap: 3px;
       z-index: 500;
       animation: dropdownFade 0.15s ease-out;
+    }
+
+    .burger-dropdown.align-left {
+      left: 0;
+      right: auto;
     }
 
     .burger-dropdown.open {
@@ -2452,6 +2460,18 @@
       });
 
       // BURGER MENU HANDLERS
+      function positionBurgerDropdown() {
+        if (!burgerWrap || !burgerMenu) return;
+        const wrapRect = burgerWrap.getBoundingClientRect();
+        const menuW = Math.min(280, window.innerWidth - 28);
+        // If aligning right edge of dropdown to right edge of button would overflow left edge of viewport
+        if (wrapRect.right < menuW + 12) {
+          burgerMenu.classList.add('align-left');
+        } else {
+          burgerMenu.classList.remove('align-left');
+        }
+      }
+
       function closeBurgerMenu() {
         burgerMenu.classList.remove('open');
         burgerToggleBtn.classList.remove('active');
@@ -2460,6 +2480,7 @@
 
       function toggleBurgerMenu(e) {
         e.stopPropagation();
+        positionBurgerDropdown();
         const isOpen = burgerMenu.classList.toggle('open');
         burgerToggleBtn.classList.toggle('active', isOpen);
         burgerToggleBtn.setAttribute('aria-expanded', String(isOpen));
@@ -2763,6 +2784,9 @@
       });
 
       window.addEventListener('resize', () => {
+        if (burgerMenu.classList.contains('open')) {
+          positionBurgerDropdown();
+        }
         drawChart();
       });
 
