@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Інтерактивний конспект: Фізика тепловтрат та ІЧ-термографія</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #fcfcfc;
+      --bg-card: #ffffff;
+      --dark: #2a2a2a;
+      --dark-soft: #424242;
+      --text-muted: #686868;
+      --border: #e4e4e4;
+      --primary: #a0001b;
+      --primary-soft: rgba(160, 0, 27, 0.08);
+      --gold: #fbba00;
+      --gold-dark: #c49000;
+      --gold-soft: rgba(251, 186, 0, 0.15);
+      --cyan: #3eb1c8;
+      --cyan-dark: #21899e;
+      --cyan-soft: rgba(62, 177, 200, 0.14);
+      --radius: 12px;
+      --shadow: 0 4px 18px rgba(42, 42, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--dark);
+      font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Sticky Top Navigation */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(252, 252, 252, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      border-top: 4px solid var(--primary);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-badge {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 7px;
+      letter-spacing: 0.4px;
+    }
+
+    .nav-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: var(--dark);
+      font-size: 13.5px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 7px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-link:hover {
+      background: var(--gold-soft);
+      color: var(--dark);
+    }
+
+    .btn-back {
+      text-decoration: none;
+      background: var(--dark);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 7px;
+      transition: background 0.15s;
+    }
+
+    .btn-back:hover {
+      background: var(--primary);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 20px 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* Hero Banner */
+    .hero-card {
+      background: var(--dark);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border-left: 6px solid var(--gold);
+    }
+
+    .hero-card h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+
+    .hero-card p {
+      color: #dedede;
+      max-width: 820px;
+      font-size: 15.5px;
+    }
+
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .hero-pill {
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    /* Section Card */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .section-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .section-header h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Animated SVG Stage */
+    .anim-stage {
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stage-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .mode-tabs {
+      display: inline-flex;
+      background: #eaeaea;
+      padding: 3px;
+      border-radius: 8px;
+      gap: 4px;
+    }
+
+    .mode-tab {
+      border: none;
+      background: transparent;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--dark-soft);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .mode-tab.active {
+      background: var(--bg-card);
+      color: var(--primary);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    /* SVG Keyframe Animations */
+    @keyframes steamRise {
+      0% { transform: translateY(0) scaleX(1); opacity: 0.85; }
+      50% { transform: translateY(-18px) scaleX(1.08); opacity: 0.55; }
+      100% { transform: translateY(-38px) scaleX(0.95); opacity: 0; }
+    }
+
+    @keyframes wavePulse {
+      0% { transform: translateX(0); opacity: 0.85; }
+      100% { transform: translateX(16px); opacity: 0; }
+    }
+
+    @keyframes wavePulseLeft {
+      0% { transform: translateX(0); opacity: 0.85; }
+      100% { transform: translateX(-16px); opacity: 0; }
+    }
+
+    @keyframes conductFlow {
+      0% { stroke-dashoffset: 24; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes rayFlow {
+      0% { stroke-dashoffset: 36; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    .steam-path {
+      animation: steamRise 2.4s infinite ease-in-out;
+    }
+    .steam-path.d2 { animation-delay: 0.8s; }
+    .steam-path.d3 { animation-delay: 1.6s; }
+
+    .rad-wave-r {
+      animation: wavePulse 2s infinite ease-out;
+    }
+    .rad-wave-l {
+      animation: wavePulseLeft 2s infinite ease-out;
+    }
+
+    .flow-dashed {
+      stroke-dasharray: 6 6;
+      animation: conductFlow 1s infinite linear;
+    }
+
+    .ir-ray-anim {
+      stroke-dasharray: 8 6;
+      animation: rayFlow 1.1s infinite linear;
+    }
+
+    /* Info Cards & Mechanisms List */
+    .mech-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mech-item {
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fff;
+    }
+
+    .mech-item.gold { border-left-color: var(--gold); }
+    .mech-item.cyan { border-left-color: var(--cyan); }
+
+    .mech-item h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .share-pill {
+      font-size: 11.5px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .mech-item p {
+      font-size: 13.5px;
+      color: var(--dark-soft);
+    }
+
+    /* Energy Loss Bars */
+    .loss-bars-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .bar-row {
+      margin-bottom: 8px;
+    }
+    .bar-row:last-child { margin-bottom: 0; }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .bar-track {
+      height: 10px;
+      background: #eee;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* Interactive Simulator Controls */
+    .sim-panel {
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .slider-val {
+      color: var(--primary);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .preset-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .preset-btn {
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--dark);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .sim-readouts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .readout-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--dark);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .readout-box.r-ref { border-top-color: var(--primary); }
+    .readout-box.r-wall { border-top-color: var(--gold); }
+    .readout-box.r-cam { border-top-color: var(--cyan); }
+
+    .readout-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .readout-num {
+      font-size: 21px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .formula-block {
+      background: var(--dark);
+      color: #fff;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      border-left: 4px solid var(--gold);
+      margin: 10px 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 920px) {
+      .grid-2col {
+        grid-template-columns: 1fr;
+      }
+      .sim-readouts {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAVIGATION -->
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <span class="nav-badge">КОНСПЕКТ</span>
+      <span class="nav-title">Фізика тепловтрат та основи інфрачервоної термографії</span>
+    </div>
+    <div class="nav-links">
+      <a href="#section-heatloss" class="nav-link">1. Механізми тепловтрат</a>
+      <a href="#section-emissivity" class="nav-link">2. Похибка тепловізора (ε)</a>
+      <a href="#section-newton" class="nav-link">3. Закон Ньютона та Інтеграл</a>
+      <a href="index.html" class="btn-back">← До лабораторного журналу</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- HERO -->
+    <section class="hero-card">
+      <h1>Чому чашка остигає і що насправді «бачить» тепловізор?</h1>
+      <p>
+        Інтерактивний теоретичний посібник до лабораторної роботи для студентів-енергоменеджерів.
+        Дослідіть анімовані схеми теплообміну, роль елементарної теплоізоляції (блюдце + картонна підставка)
+        та фізичні причини розбіжності між контактною термопарою і безконтактним тепловізором.
+      </p>
+      <div class="hero-pills">
+        <span class="hero-pill">🌡️ Випаровування та конвекція</span>
+        <span class="hero-pill">🧱 Термічний опір стінки та підставки</span>
+        <span class="hero-pill">📡 Закон Стефана–Больцмана та Емісивність ε</span>
+        <span class="hero-pill">📉 Закон охолодження Ньютона</span>
+      </div>
+    </section>
+
+    <!-- SECTION 1: HEAT LOSS MECHANISMS -->
+    <section class="section-card" id="section-heatloss">
+      <div class="section-header">
+        <div class="section-num">1</div>
+        <h2>Фізика процесу тепловтрат: Неутеплена vs Утеплена чашка</h2>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Animated SVG Comparison -->
+        <div class="anim-stage">
+          <div class="stage-toolbar">
+            <strong style="font-size: 13.5px;">Анімована схема потоків теплової енергії:</strong>
+            <div class="mode-tabs">
+              <button class="mode-tab active" data-cupmode="both">Обидві чашки поруч</button>
+              <button class="mode-tab" data-cupmode="uninsulated">Лише неутеплена</button>
+              <button class="mode-tab" data-cupmode="insulated">Лише утеплена</button>
+            </div>
+          </div>
+
+          <svg id="cupsSvg" viewBox="0 0 680 340" width="100%" height="auto" style="background:#fff; border-radius:8px; border:1px solid #ececec;">
+            <defs>
+              <linearGradient id="hotWaterGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#a0001b" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#fbba00" stop-opacity="0.85" />
+              </linearGradient>
+              <linearGradient id="tableGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#d8d8d8" />
+                <stop offset="100%" stop-color="#b8b8b8" />
+              </linearGradient>
+            </defs>
+
+            <!-- Desk surface -->
+            <rect x="20" y="275" width="640" height="22" rx="4" fill="url(#tableGrad)" />
+            <text x="340" y="314" text-anchor="middle" fill="#686868" font-size="11.5" font-weight="600">
+              Холодна поверхня столу (поглинає тепло при прямому контакті)
+            </text>
+
+            <!-- LEFT CUP: UNINSULATED -->
+            <g id="svgUninsulatedCup" transform="translate(65, 0)">
+              <text x="110" y="28" text-anchor="middle" fill="#a0001b" font-size="13.5" font-weight="700">
+                НЕУТЕПЛЕНА ЧАШКА
+              </text>
+              <text x="110" y="45" text-anchor="middle" fill="#686868" font-size="11">
+                Відкрита поверхня + прямий контакт зі столом
+              </text>
+
+              <!-- Rising Steam & Intense Evaporation (55% loss) -->
+              <g class="steam-group">
+                <path class="steam-path" d="M 75 115 Q 65 95 80 78 T 72 45" fill="none" stroke="#a0001b" stroke-width="3" stroke-linecap="round" />
+                <path class="steam-path d2" d="M 110 112 Q 122 92 106 74 T 115 42" fill="none" stroke="#a0001b" stroke-width="3.5" stroke-linecap="round" />
+                <path class="steam-path d3" d="M 142 115 Q 130 95 145 78 T 138 46" fill="none" stroke="#a0001b" stroke-width="3" stroke-linecap="round" />
+                <text x="110" y="72" text-anchor="middle" fill="#a0001b" font-size="11" font-weight="700">
+                  Випаровування + конвекція (~55%)
+                </text>
+              </g>
+
+              <!-- Cup Body -->
+              <path d="M 55 120 L 65 274 L 155 274 L 165 120 Z" fill="#ffffff" stroke="#2a2a2a" stroke-width="3" />
+              <!-- Cup Handle -->
+              <path d="M 162 145 C 195 145, 195 225, 158 225" fill="none" stroke="#2a2a2a" stroke-width="5" />
+              <!-- Hot Water Inside -->
+              <path d="M 59 138 L 67 271 L 153 271 L 161 138 Z" fill="url(#hotWaterGrad)" />
+
+              <!-- Thermocouple immersed in water -->
+              <path d="M 35 88 L 95 88 L 95 215" fill="none" stroke="#2a2a2a" stroke-width="2.5" stroke-dasharray="3 2" />
+              <circle cx="95" cy="215" r="4.5" fill="#a0001b" stroke="#fff" stroke-width="1.5" />
+              <rect x="8" y="74" width="68" height="20" rx="4" fill="#2a2a2a" />
+              <text x="42" y="88" text-anchor="middle" fill="#fbba00" font-size="10" font-weight="700">Термопара T₃</text>
+
+              <!-- Side Radiation Waves -->
+              <path class="rad-wave-l" d="M 42 165 Q 34 190 42 215" fill="none" stroke="#3eb1c8" stroke-width="2.5" stroke-linecap="round" />
+              <path class="rad-wave-l" d="M 32 155 Q 22 190 32 225" fill="none" stroke="#3eb1c8" stroke-width="2" stroke-linecap="round" />
+              <text x="18" y="250" text-anchor="middle" fill="#21899e" font-size="10.5" font-weight="600">ІЧ + конвекція (~30%)</text>
+
+              <!-- Bottom Conduction Arrows into Desk -->
+              <line class="flow-dashed" x1="85" y1="268" x2="85" y2="296" stroke="#a0001b" stroke-width="3" />
+              <line class="flow-dashed" x1="110" y1="268" x2="110" y2="296" stroke="#a0001b" stroke-width="3" />
+              <line class="flow-dashed" x1="135" y1="268" x2="135" y2="296" stroke="#a0001b" stroke-width="3" />
+              <text x="110" y="332" text-anchor="middle" fill="#a0001b" font-size="10.5" font-weight="700">
+                Теплопровідність у стіл (~15%)
+              </text>
+            </g>
+
+            <!-- RIGHT CUP: INSULATED (SAUCER + CARDBOARD COASTER) -->
+            <g id="svgInsulatedCup" transform="translate(385, 0)">
+              <text x="115" y="28" text-anchor="middle" fill="#21899e" font-size="13.5" font-weight="700">
+                УТЕПЛЕНА ЧАШКА
+              </text>
+              <text x="115" y="45" text-anchor="middle" fill="#686868" font-size="11">
+                Накрита блюдцем + картонна підставка знизу
+              </text>
+
+              <!-- Saucer on top blocking steam -->
+              <ellipse cx="115" cy="116" rx="70" ry="8" fill="#ffffff" stroke="#2a2a2a" stroke-width="3" />
+              <rect x="92" y="103" width="46" height="8" rx="3" fill="#fbba00" stroke="#2a2a2a" stroke-width="1.5" />
+              <text x="115" y="88" text-anchor="middle" fill="#2a2a2a" font-size="11" font-weight="700">
+                🛡️ Блюдце блокує пару (-85% втрат зверху)
+              </text>
+
+              <!-- Cup Body -->
+              <path d="M 60 120 L 70 258 L 160 258 L 170 120 Z" fill="#ffffff" stroke="#2a2a2a" stroke-width="3" />
+              <!-- Cup Handle -->
+              <path d="M 167 145 C 200 145, 200 220, 163 220" fill="none" stroke="#2a2a2a" stroke-width="5" />
+              <!-- Hot Water Inside -->
+              <path d="M 64 142 L 72 255 L 158 255 L 166 142 Z" fill="url(#hotWaterGrad)" />
+
+              <!-- Trapped air cushion under saucer -->
+              <path d="M 82 134 C 95 124, 135 124, 148 134" fill="none" stroke="#fbba00" stroke-width="2" stroke-dasharray="4 3" />
+
+              <!-- Cardboard Coaster under bottom -->
+              <rect x="52" y="259" width="126" height="15" rx="3" fill="#d9a05b" stroke="#2a2a2a" stroke-width="2" />
+              <line x1="56" y1="266" x2="174" y2="266" stroke="#fff" stroke-width="1.5" stroke-dasharray="4 4" />
+              <text x="115" y="332" text-anchor="middle" fill="#c49000" font-size="10.5" font-weight="700">
+                📦 Пористий картон (λ ≈ 0.07 Вт/(м·К)) ізолює дно
+              </text>
+
+              <!-- Side mild radiation -->
+              <path class="rad-wave-l" d="M 48 175 Q 41 195 48 215" fill="none" stroke="#fbba00" stroke-width="2" stroke-linecap="round" />
+            </g>
+          </svg>
+
+          <!-- Dynamic Heat Loss Breakdown Bars -->
+          <div class="loss-bars-box">
+            <div class="bar-row">
+              <div class="bar-label">
+                <span>Потужність тепловтрат неутепленої чашки (при T = 85 °C):</span>
+                <span style="color: var(--primary);" id="uninsPowerText">≈ 48 Вт (100%)</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width: 100%; background: var(--primary);"></div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">
+                <span>Потужність тепловтрат утепленої чашки (блюдце + картон):</span>
+                <span style="color: var(--cyan-dark);" id="insPowerText">≈ 21 Вт (44% — економія ~56%!)</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width: 44%; background: var(--cyan);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: Physics explanation -->
+        <div class="mech-list">
+          <div class="mech-item">
+            <h3>
+              <span>1. Випаровування та вільна конвекція з поверхні</span>
+              <span class="share-pill">50–60% втрат</span>
+            </h3>
+            <p>
+              Найбільший канал втрати енергії відкритої чашки з окропом — це фазовий перехід води в пару
+              (питома теплота пароутворення становить <b>r ≈ 2260 кДж/кг</b>!). Навіть випаровування лише 5 грамів води
+              забирає понад <b>11.3 кДж</b> тепла. Коли ми накриваємо чашку <b>блюдцем</b>, водяна пара конденсується
+              на нижній поверхні блюдця, повертаючи тепло назад, а повітряний прошарок зупиняє конвективні потоки.
+            </p>
+          </div>
+
+          <div class="mech-item gold">
+            <h3>
+              <span>2. Кондуктивна теплопровідність через дно в стіл</span>
+              <span class="share-pill" style="background: var(--gold-soft); color: var(--gold-dark);">15–20% втрат</span>
+            </h3>
+            <p>
+              За законом Фур'є густина теплового потоку дорівнює <b>q = −λ · (dT/dx)</b>. Масивна стільниця має високу
+              теплоємність і теплопровідність, тому активно відбирає тепло від дна чашки. <b>Гофрований картон</b> містить
+              замкнені повітряні пори з низьким коефіцієнтом теплопровідності (<b>λ ≈ 0.06–0.08 Вт/(м·К)</b> проти ~0.8–1.5 у кераміки/дерева),
+              створюючи високий термічний опір <b>R = δ / λ</b>.
+            </p>
+          </div>
+
+          <div class="mech-item cyan">
+            <h3>
+              <span>3. Теплове ІЧ-випромінювання та конвекція стінок</span>
+              <span class="share-pill" style="background: var(--cyan-soft); color: var(--cyan-dark);">25–30% втрат</span>
+            </h3>
+            <p>
+              Бічні стінки чашки віддають тепло навколишньому повітрю шляхом природної конвекції
+              (<b>q<sub>конв</sub> = α · (T<sub>ст</sub> − T<sub>навк</sub>)</b>) та інфрачервоного випромінювання за законом
+              Стефана–Больцмана: <b>q<sub>випр</sub> = ε · σ · (T<sub>ст</sub>⁴ − T<sub>навк</sub>⁴)</b>. Саме це інфрачервоне
+              випромінювання у діапазоні 8–14 мкм і реєструє матриця тепловізора!
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: WHY THERMAL IMAGER DIFFERS FROM THERMOCOUPLE -->
+    <section class="section-card" id="section-emissivity">
+      <div class="section-header">
+        <div class="section-num">2</div>
+        <h2>Чому покази тепловізора відрізняються від еталонної термопари?</h2>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Animated Diagram of Wall Gradient + Emissivity Reflection -->
+        <div class="anim-stage">
+          <strong style="font-size: 13.5px;">Анімована схема формування інфрачервоного сигналу на стінці чашки:</strong>
+          <svg viewBox="0 0 650 310" width="100%" height="auto" style="background:#fff; border-radius:8px; border:1px solid #ececec;">
+            <!-- Hot Water Zone (Left) -->
+            <rect x="20" y="30" width="145" height="250" rx="6" fill="rgba(160, 0, 27, 0.12)" stroke="#a0001b" stroke-width="1.5" />
+            <text x="92" y="55" text-anchor="middle" fill="#a0001b" font-size="13" font-weight="700">ГАРЯЧА ВОДА</text>
+            <text x="92" y="75" text-anchor="middle" fill="#2a2a2a" font-size="12" font-weight="600" id="svgWaterTempText">T₃ = 90.0 °C</text>
+
+            <!-- Thermocouple sensor inside water -->
+            <line x1="85" y1="30" x2="85" y2="165" stroke="#2a2a2a" stroke-width="3.5" />
+            <circle cx="85" cy="165" r="7" fill="#a0001b" stroke="#fff" stroke-width="2" />
+            <text x="85" y="192" text-anchor="middle" fill="#a0001b" font-size="11.5" font-weight="700">Зонд термопари</text>
+            <text x="85" y="207" text-anchor="middle" fill="#686868" font-size="10.5">(прямий контакт із водою)</text>
+
+            <!-- Ceramic Cup Wall (Middle) -->
+            <rect x="165" y="30" width="95" height="250" fill="#f3efe6" stroke="#2a2a2a" stroke-width="2.5" />
+            <text x="212" y="55" text-anchor="middle" fill="#2a2a2a" font-size="12.5" font-weight="700">СТІНКА ЧАШКИ</text>
+            <text x="212" y="72" text-anchor="middle" fill="#686868" font-size="10.5">Термічний опір δ/λ</text>
+
+            <!-- Temperature gradient line inside wall -->
+            <path d="M 165 125 L 260 165" stroke="#fbba00" stroke-width="4" />
+            <circle cx="165" cy="125" r="4" fill="#a0001b" />
+            <circle cx="260" cy="165" r="5" fill="#fbba00" stroke="#2a2a2a" stroke-width="1.5" />
+            <text x="212" y="195" text-anchor="middle" fill="#c49000" font-size="11" font-weight="700" id="svgWallDropText">
+              Перепад ΔT_ст = −2.5 °C
+            </text>
+            <text x="262" y="255" text-anchor="start" fill="#2a2a2a" font-size="11.5" font-weight="700" id="svgSurfaceTempText">
+              Зовн. поверхня: 87.5 °C
+            </text>
+
+            <!-- Ambient Room Source (Top Right) -->
+            <rect x="330" y="28" width="160" height="44" rx="6" fill="rgba(62, 177, 200, 0.15)" stroke="#3eb1c8" stroke-width="1.5" />
+            <text x="410" y="47" text-anchor="middle" fill="#21899e" font-size="11.5" font-weight="700">Оточення кімнати (T_навк)</text>
+            <text x="410" y="63" text-anchor="middle" fill="#2a2a2a" font-size="11">Випромінює фон: (1 − ε)·σ·T_навк⁴</text>
+
+            <!-- Incident Ambient Ray hitting glossy wall and reflecting into camera -->
+            <path class="ir-ray-anim" d="M 380 72 L 262 155 L 515 162" fill="none" stroke="#3eb1c8" stroke-width="3" />
+            <text x="395" y="132" text-anchor="middle" fill="#21899e" font-size="11" font-weight="700">
+              Відбитий промінь (1 − ε)
+            </text>
+
+            <!-- Direct Emitted IR Ray from cup wall to camera -->
+            <path class="ir-ray-anim" d="M 262 172 L 515 172" fill="none" stroke="#a0001b" stroke-width="4" />
+            <text x="390" y="194" text-anchor="middle" fill="#a0001b" font-size="11.5" font-weight="700">
+              Власне ІЧ-випромінювання чашки (ε · σ · T_пов⁴)
+            </text>
+
+            <!-- Thermal Imager Camera (Right) -->
+            <g transform="translate(515, 130)">
+              <rect x="0" y="18" width="22" height="40" rx="3" fill="#424242" />
+              <rect x="20" y="6" width="95" height="64" rx="8" fill="#2a2a2a" stroke="#fbba00" stroke-width="2" />
+              <text x="67" y="28" text-anchor="middle" fill="#fbba00" font-size="11" font-weight="700">ТЕПЛОВІЗОР</text>
+              <text x="67" y="48" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="700" id="svgCameraReadText">84.2 °C</text>
+              <text x="67" y="62" text-anchor="middle" fill="#3eb1c8" font-size="9.5">Безконтактний замір</text>
+            </g>
+          </svg>
+
+          <div class="formula-block">
+            <b>Основне рівняння радіометрії тепловізора:</b><br/>
+            W<sub>сум</sub> = ε · σ · T<sub>поверхні</sub>⁴ + (1 − ε) · σ · T<sub>навк</sub>⁴
+          </div>
+        </div>
+
+        <!-- Interactive Emissivity & Wall Gradient Simulator -->
+        <div class="sim-panel">
+          <h3 style="font-size: 16px; font-weight: 700; color: var(--dark);">
+            🎛️ Інтерактивний симулятор: Похибка безконтактного вимірювання
+          </h3>
+          <p style="font-size: 13px; color: var(--text-muted);">
+            Змінюйте параметри стінки чашки та коефіцієнт випромінювання <b>ε</b>, щоб побачити, як формується різниця
+            між показами термопари (T₃) та тепловізора (T₂):
+          </p>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <span>Температура води всередині чашки (Термопара T₃):</span>
+              <span class="slider-val" id="simWaterVal">90.0 °C</span>
+            </div>
+            <input type="range" id="simWaterInput" min="30" max="100" step="0.5" value="90" />
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <span>Перепад температури на стінці чашки (ΔT<sub>стінки</sub>):</span>
+              <span class="slider-val" id="simWallDropVal">2.5 °C</span>
+            </div>
+            <input type="range" id="simWallDropInput" min="0" max="10" step="0.5" value="2.5" />
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <span>Дійсний коефіцієнт випромінювання поверхні чашки (ε<sub>дійсн</sub>):</span>
+              <span class="slider-val" id="simEpsRealVal">0.88</span>
+            </div>
+            <input type="range" id="simEpsRealInput" min="0.15" max="0.98" step="0.01" value="0.88" />
+            <div class="preset-btns">
+              <button class="preset-btn" data-eps="0.94" data-drop="2.0">Матова кераміка (ε=0.94)</button>
+              <button class="preset-btn" data-eps="0.86" data-drop="2.5">Глянцева глазур (ε=0.86)</button>
+              <button class="preset-btn" data-eps="0.60" data-drop="1.5">Світла емаль (ε=0.60)</button>
+              <button class="preset-btn" data-eps="0.22" data-drop="0.5">Полірована сталь (ε=0.22)</button>
+            </div>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <span>Встановлений у налаштуваннях тепловізора ε<sub>камери</sub>:</span>
+              <span class="slider-val" id="simEpsCamVal">0.95</span>
+            </div>
+            <input type="range" id="simEpsCamInput" min="0.50" max="1.00" step="0.01" value="0.95" />
+          </div>
+
+          <div class="sim-readouts">
+            <div class="readout-box r-ref">
+              <div class="readout-label">Термопара (T₃)</div>
+              <div class="readout-num" style="color: var(--primary);" id="outThermocouple">90.0 °C</div>
+            </div>
+            <div class="readout-box r-wall">
+              <div class="readout-label">Зовн. стінка</div>
+              <div class="readout-num" style="color: var(--gold-dark);" id="outSurface">87.5 °C</div>
+            </div>
+            <div class="readout-box r-cam">
+              <div class="readout-label">Тепловізор (T₂)</div>
+              <div class="readout-num" style="color: var(--cyan-dark);" id="outCamera">83.9 °C</div>
+            </div>
+          </div>
+
+          <div style="background: var(--primary-soft); border-left: 4px solid var(--primary); padding: 10px 12px; border-radius: 6px; font-size: 13px;">
+            <b>Сумарна розбіжність (T₃ − T₂): <span id="outTotalError" style="color: var(--primary);">+6.1 °C</span></b>
+            <div style="font-size: 12px; color: var(--dark-soft); margin-top: 3px;" id="outErrorBreakdown">
+              Із них 2.5 °C — через термічний опір керамічної стінки, та 3.6 °C — оптична похибка емісивності й відбиття холодного фону кімнати (20 °C).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: NEWTON'S LAW & INTEGRAL AREA -->
+    <section class="section-card" id="section-newton">
+      <div class="section-header">
+        <div class="section-num">3</div>
+        <h2>Закон охолодження Ньютона та площа під графіком (втрата енергії)</h2>
+      </div>
+
+      <div class="grid-2col">
+        <div>
+          <h3 style="font-size: 16.5px; font-weight: 700; margin-bottom: 8px;">
+            Чому крива охолодження є експонентою?
+          </h3>
+          <p style="margin-bottom: 10px; color: var(--dark-soft);">
+            Швидкість втрати теплоти тілом прямо пропорційна різниці температур між поверхнею тіла <b>T(t)</b>
+            та навколишнім середовищем <b>T<sub>навк</sub></b> (закон Ньютона–Ріхмана):
+          </p>
+          <div class="formula-block">
+            dT / dt = −k · (T(t) − T<sub>навк</sub>) &nbsp;&nbsp;⇒&nbsp;&nbsp;
+            <b>T(t) = T<sub>навк</sub> + (T₀ − T<sub>навк</sub>) · e<sup>−k·t</sup></b>
+          </div>
+          <p style="margin-bottom: 12px; color: var(--dark-soft);">
+            Коефіцієнт охолодження <b>k = (α · F) / (m · c)</b> [хв⁻¹] залежить від коефіцієнта тепловіддачі <b>α</b>,
+            площі поверхні <b>F</b> та теплоємності води <b>m·c</b>. Спочатку, коли окріп має 90–95 °C, температурний
+            напір ΔT максимальний, тому температура падає стрімко. У міру наближення до T<sub>навк</sub> графік стає пологішим.
+          </p>
+
+          <h3 style="font-size: 16.5px; font-weight: 700; margin-bottom: 8px;">
+            Фізичний зміст площі під графіком S = ∫(T(t) − T<sub>навк</sub>)dt
+          </h3>
+          <p style="color: var(--dark-soft);">
+            Миттєвий тепловий потік з поверхні в довкілля становить <b>q(t) = K · (T(t) − T<sub>навк</sub>)</b>.
+            Інтегруючи цей вираз за часом від <b>t = 0</b> до <b>t<sub>кін</sub></b>, отримуємо величину, пропорційну
+            сумарній кількості відданої теплової енергії:
+          </p>
+          <div class="formula-block" style="border-left-color: var(--cyan);">
+            Q<sub>втрач</sub> ∝ ∫<sub>0</sub><sup>t_кін</sup> (T(t) − T<sub>навк</sub>) dt &nbsp;[°C · хв]
+          </div>
+        </div>
+
+        <div class="sim-panel">
+          <h3 style="font-size: 15.5px; font-weight: 700;">
+            📊 Пам'ятка для висновків у звіті студента:
+          </h3>
+          <ul style="padding-left: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 13.5px; color: var(--dark-soft);">
+            <li>
+              <b>Порівняння коефіцієнтів охолодження k:</b> у чашки з блюдцем та картонною підставкою коефіцієнт <b>k₁</b>
+              є суттєво меншим за <b>k₂</b> неутепленої чашки, що свідчить про зниження сумарного коефіцієнта теплопередачі.
+            </li>
+            <li>
+              <b>Інтеграл температурного напору (площа під графіком):</b> чисельне інтегрування методом трапецій дозволяє
+              кількісно порівняти тепловий режим двох об'єктів за весь період спостереження (20 хвилин).
+            </li>
+            <li>
+              <b>Похибка тепловізора відносно термопари:</b> для коректного безконтактного вимірювання енергоаудитор
+              повинен вводити в меню тепловізора правильний коефіцієнт випромінювання матеріалу <b>ε</b> (для глазурованої
+              кераміки 0.88–0.92) та враховувати відбиту температуру навколишніх предметів.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      // Cup Mode Switcher in Section 1
+      const modeTabs = document.querySelectorAll('.mode-tab');
+      const svgUnins = document.getElementById('svgUninsulatedCup');
+      const svgIns = document.getElementById('svgInsulatedCup');
+
+      modeTabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+          modeTabs.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const mode = btn.dataset.cupmode;
+          if (mode === 'both') {
+            svgUnins.style.display = 'block';
+            svgIns.style.display = 'block';
+            svgUnins.setAttribute('transform', 'translate(65, 0)');
+            svgIns.setAttribute('transform', 'translate(385, 0)');
+          } else if (mode === 'uninsulated') {
+            svgUnins.style.display = 'block';
+            svgIns.style.display = 'none';
+            svgUnins.setAttribute('transform', 'translate(230, 0)');
+          } else {
+            svgUnins.style.display = 'none';
+            svgIns.style.display = 'block';
+            svgIns.setAttribute('transform', 'translate(225, 0)');
+          }
+        });
+      });
+
+      // Interactive Emissivity Simulator in Section 2
+      const simWaterInput = document.getElementById('simWaterInput');
+      const simWallDropInput = document.getElementById('simWallDropInput');
+      const simEpsRealInput = document.getElementById('simEpsRealInput');
+      const simEpsCamInput = document.getElementById('simEpsCamInput');
+
+      const simWaterVal = document.getElementById('simWaterVal');
+      const simWallDropVal = document.getElementById('simWallDropVal');
+      const simEpsRealVal = document.getElementById('simEpsRealVal');
+      const simEpsCamVal = document.getElementById('simEpsCamVal');
+
+      const outThermocouple = document.getElementById('outThermocouple');
+      const outSurface = document.getElementById('outSurface');
+      const outCamera = document.getElementById('outCamera');
+      const outTotalError = document.getElementById('outTotalError');
+      const outErrorBreakdown = document.getElementById('outErrorBreakdown');
+
+      const svgWaterTempText = document.getElementById('svgWaterTempText');
+      const svgWallDropText = document.getElementById('svgWallDropText');
+      const svgSurfaceTempText = document.getElementById('svgSurfaceTempText');
+      const svgCameraReadText = document.getElementById('svgCameraReadText');
+
+      function updateSimulator() {
+        const tWater = parseFloat(simWaterInput.value);
+        const wallDrop = parseFloat(simWallDropInput.value);
+        const epsReal = parseFloat(simEpsRealInput.value);
+        const epsCam = parseFloat(simEpsCamInput.value);
+        const tAmb = 20.0;
+
+        const tSurf = tWater - wallDrop;
+
+        // Radiometric calculation in Kelvin
+        const tSurfK = tSurf + 273.15;
+        const tAmbK = tAmb + 273.15;
+
+        // Total infrared radiance reaching sensor (normalized by sigma)
+        const totalRad = epsReal * Math.pow(tSurfK, 4) + (1 - epsReal) * Math.pow(tAmbK, 4);
+
+        // Camera assumes emissivity = epsCam and compensates (1 - epsCam)*T_amb^4
+        const camObjRad = (totalRad - (1 - epsCam) * Math.pow(tAmbK, 4)) / epsCam;
+        const tCamK = Math.pow(Math.max(100, camObjRad), 0.25);
+        const tCam = tCamK - 273.15;
+
+        const totalDiff = tWater - tCam;
+        const opticalDiff = tSurf - tCam;
+
+        simWaterVal.textContent = `${tWater.toFixed(1)} °C`;
+        simWallDropVal.textContent = `${wallDrop.toFixed(1)} °C`;
+        simEpsRealVal.textContent = epsReal.toFixed(2);
+        simEpsCamVal.textContent = epsCam.toFixed(2);
+
+        outThermocouple.textContent = `${tWater.toFixed(1)} °C`;
+        outSurface.textContent = `${tSurf.toFixed(1)} °C`;
+        outCamera.textContent = `${tCam.toFixed(1)} °C`;
+
+        const sign = totalDiff >= 0 ? '+' : '';
+        outTotalError.textContent = `${sign}${totalDiff.toFixed(1)} °C`;
+        outErrorBreakdown.textContent =
+          `Із них ${wallDrop.toFixed(1)} °C — через термічний опір стінки чашки, та ${opticalDiff.toFixed(1)} °C — оптична похибка невідповідності ε (${epsReal.toFixed(2)} vs ${epsCam.toFixed(2)}) і відбиття фону кімнати (20 °C).`;
+
+        svgWaterTempText.textContent = `T₃ = ${tWater.toFixed(1)} °C`;
+        svgWallDropText.textContent = `Перепад ΔT_ст = −${wallDrop.toFixed(1)} °C`;
+        svgSurfaceTempText.textContent = `Зовн. поверхня: ${tSurf.toFixed(1)} °C`;
+        svgCameraReadText.textContent = `${tCam.toFixed(1)} °C`;
+      }
+
+      [simWaterInput, simWallDropInput, simEpsRealInput, simEpsCamInput].forEach(inp => {
+        inp.addEventListener('input', updateSimulator);
+      });
+
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          simEpsRealInput.value = btn.dataset.eps;
+          simWallDropInput.value = btn.dataset.drop;
+          updateSimulator();
+        });
+      });
+
+      updateSimulator();
+    })();
+  </script>
+</body>
+</html>

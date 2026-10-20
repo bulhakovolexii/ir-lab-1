@@ -1,0 +1,2213 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Лабораторна робота: Термографічне дослідження тепловтрат</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #fcfcfc;
+      --bg-card: #ffffff;
+      --dark: #2a2a2a;
+      --dark-soft: #444444;
+      --text-muted: #6b6b6b;
+      --border: #e4e4e4;
+      --border-strong: #d0d0d0;
+      --primary: #a0001b;
+      --primary-hover: #820016;
+      --primary-soft: rgba(160, 0, 27, 0.08);
+      --gold: #fbba00;
+      --gold-dark: #c99400;
+      --gold-soft: rgba(251, 186, 0, 0.14);
+      --cyan: #3eb1c8;
+      --cyan-dark: #258da2;
+      --cyan-soft: rgba(62, 177, 200, 0.13);
+      --radius: 10px;
+      --shadow: 0 2px 10px rgba(42, 42, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      background-color: var(--bg-main);
+      color: var(--dark);
+      font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      padding: 10px 14px;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    /* TOP HEADER & CONTROLS */
+    .top-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--primary);
+      border-radius: var(--radius);
+      padding: 8px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .brand-title h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+      line-height: 1.2;
+    }
+
+    .brand-subtitle {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .save-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1px 7px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 500;
+      background: rgba(62, 177, 200, 0.14);
+      color: var(--cyan-dark);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .param-field {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 7px;
+    }
+
+    .param-field label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--dark-soft);
+      white-space: nowrap;
+    }
+
+    .param-field input {
+      width: 52px;
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      padding: 3px 6px;
+      font-family: 'Fira Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dark);
+      text-align: center;
+      background: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .param-field input:focus {
+      outline: 2px solid var(--primary);
+      border-color: var(--primary);
+    }
+
+    .param-unit {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    /* Timer widget */
+    .timer-widget {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--dark);
+      color: #fff;
+      padding: 5px 11px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #888;
+    }
+
+    .timer-widget.active .timer-dot {
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold);
+      animation: pulseDot 1.2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.65; }
+    }
+
+    .timer-countdown {
+      font-weight: 700;
+      font-size: 13.5px;
+      color: var(--gold);
+      min-width: 44px;
+      text-align: center;
+    }
+
+    .sound-btn {
+      background: rgba(255,255,255,0.12);
+      border: none;
+      color: #fff;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+
+    .sound-btn:hover {
+      background: rgba(255,255,255,0.24);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-family: 'Fira Sans', sans-serif;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-cyan {
+      background: var(--cyan);
+      color: #fff;
+    }
+
+    .btn-cyan:hover {
+      background: var(--cyan-dark);
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: var(--dark);
+    }
+
+    .btn-gold:hover {
+      background: #e5aa00;
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--dark);
+      border-color: var(--border-strong);
+    }
+
+    .btn-outline:hover {
+      background: #f3f3f3;
+      border-color: var(--dark);
+    }
+
+    .btn-danger-outline {
+      background: #fff;
+      color: var(--primary);
+      border-color: rgba(160, 0, 27, 0.35);
+    }
+
+    .btn-danger-outline:hover {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+    }
+
+    /* MAIN WORKSPACE (LEFT TABLE + RIGHT CHART/STATS) */
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(430px, 43%) 1fr;
+      gap: 12px;
+      flex: 1;
+      min-height: 0; /* critical so grid children don't overflow 100vh */
+      overflow: hidden;
+    }
+
+    /* LEFT PANEL: TABLE */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #fafafa;
+      flex-shrink: 0;
+    }
+
+    .panel-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .status-pill {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: #eee;
+      color: var(--dark);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .status-pill.started {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: 1px solid rgba(160, 0, 27, 0.25);
+    }
+
+    /* Scrollable Table Container */
+    .table-scroll-container {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-strong) transparent;
+    }
+
+    .table-scroll-container::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+
+    .table-scroll-container::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 4px;
+    }
+
+    .table-scroll-container::-webkit-scrollbar-thumb:hover {
+      background: #999;
+    }
+
+    table.log-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    table.log-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--dark);
+      color: #fff;
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 7px 6px;
+      text-align: center;
+      border-bottom: 2px solid var(--border-strong);
+      vertical-align: middle;
+      line-height: 1.25;
+    }
+
+    table.log-table thead th.col-t1 {
+      border-bottom: 3px solid var(--gold);
+    }
+    table.log-table thead th.col-t2 {
+      border-bottom: 3px solid var(--cyan);
+    }
+    table.log-table thead th.col-t3 {
+      border-bottom: 3px solid var(--primary);
+    }
+
+    .th-badge {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+
+    .th-sub {
+      display: block;
+      font-size: 10px;
+      font-weight: 400;
+      color: #ccc;
+      margin-top: 2px;
+    }
+
+    table.log-table tbody tr {
+      transition: background 0.12s;
+    }
+
+    table.log-table tbody tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    table.log-table tbody tr:hover {
+      background: #f1f5f7;
+    }
+
+    table.log-table tbody tr.active-row {
+      background: var(--gold-soft) !important;
+    }
+
+    table.log-table tbody tr.completed-row td.cell-index {
+      color: var(--cyan-dark);
+      font-weight: 700;
+    }
+
+    table.log-table tbody td {
+      padding: 4px 5px;
+      border-bottom: 1px solid #ececec;
+      text-align: center;
+      font-size: 12.5px;
+    }
+
+    td.cell-index {
+      font-weight: 600;
+      color: var(--text-muted);
+      width: 44px;
+      font-size: 11.5px;
+    }
+
+    td.cell-time {
+      font-weight: 600;
+      color: var(--dark);
+      white-space: nowrap;
+      width: 82px;
+    }
+
+    .rel-min {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-left: 3px;
+    }
+
+    .temp-input {
+      width: 100%;
+      max-width: 84px;
+      padding: 4px 6px;
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      font-family: 'Fira Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      color: var(--dark);
+      background: #fff;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .temp-input::placeholder {
+      color: #bbb;
+      font-weight: 400;
+    }
+
+    .temp-input.input-t1:focus {
+      outline: none;
+      border-color: var(--gold-dark);
+      box-shadow: 0 0 0 2px rgba(251, 186, 0, 0.35);
+    }
+
+    .temp-input.input-t2:focus {
+      outline: none;
+      border-color: var(--cyan-dark);
+      box-shadow: 0 0 0 2px rgba(62, 177, 200, 0.35);
+    }
+
+    .temp-input.input-t3:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(160, 0, 27, 0.25);
+    }
+
+    td.cell-diff {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--dark-soft);
+      width: 68px;
+    }
+
+    .table-footer {
+      padding: 6px 12px;
+      background: #fafafa;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /* RIGHT PANEL: CHART + ANALYTICS */
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .chart-panel {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-legend-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+      font-size: 11.5px;
+      flex-shrink: 0;
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    .legend-item.dimmed {
+      opacity: 0.38;
+    }
+
+    .legend-line {
+      width: 18px;
+      height: 3px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .legend-line.dashed {
+      background: repeating-linear-gradient(
+        to right,
+        currentColor 0,
+        currentColor 4px,
+        transparent 4px,
+        transparent 7px
+      );
+      height: 2px;
+    }
+
+    .chart-canvas-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      padding: 6px 10px 4px 10px;
+      background: #fff;
+    }
+
+    #tempChart {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    .chart-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(42, 42, 42, 0.94);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 7px;
+      font-size: 11.5px;
+      line-height: 1.45;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+      z-index: 20;
+      display: none;
+      min-width: 195px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ANALYTICS CARDS */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 5px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+    }
+
+    .stat-card.card-gold::before { background: var(--gold); }
+    .stat-card.card-cyan::before { background: var(--cyan); }
+    .stat-card.card-primary::before { background: var(--primary); }
+
+    .stat-header {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-main-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-big-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .stat-big-value.highlight-primary {
+      color: var(--primary);
+    }
+
+    .stat-big-value.highlight-cyan {
+      color: var(--cyan-dark);
+    }
+
+    .stat-sub-rows {
+      font-size: 11.5px;
+      color: var(--dark-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-row-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .formula-tag {
+      font-size: 11px;
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--dark);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* MODAL POPUP FOR DATA CLEARING */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(42, 42, 42, 0.55);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--bg-card);
+      border-top: 4px solid var(--primary);
+      border-radius: 12px;
+      max-width: 440px;
+      width: 100%;
+      padding: 20px 22px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+      animation: modalPop 0.18s ease-out;
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-body {
+      font-size: 13.5px;
+      color: var(--dark-soft);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .modal-warning-box {
+      background: var(--primary-soft);
+      border-left: 3px solid var(--primary);
+      padding: 8px 11px;
+      border-radius: 5px;
+      margin-top: 10px;
+      font-size: 12.5px;
+      color: var(--dark);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    @media (max-width: 1024px) {
+      html, body, .app-shell {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+      }
+      .workspace {
+        grid-template-columns: 1fr;
+        overflow: visible;
+      }
+      .table-scroll-container {
+        max-height: 400px;
+      }
+      .chart-canvas-wrap {
+        min-height: 340px;
+      }
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- TOP BAR -->
+    <header class="top-bar">
+      <div class="brand-block">
+        <div class="brand-icon" title="Інфрачервона термографія">IR</div>
+        <div class="brand-title">
+          <h1>Термографічне дослідження охолодження та теплоізоляції</h1>
+          <div class="brand-subtitle">
+            <span>Лабораторний комплекс для енергоменеджерів</span>
+            <span class="save-badge" id="saveStatusBadge">✓ Збережено в браузері</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-group">
+        <div class="param-field" title="Загальна тривалість лабораторного вимірювання">
+          <label for="durationInput">Час вимірювання:</label>
+          <input type="number" id="durationInput" value="20" min="2" max="180" step="1" />
+          <span class="param-unit">хв</span>
+        </div>
+
+        <div class="param-field" title="Інтервал між замірами температури">
+          <label for="intervalInput">Інтервал:</label>
+          <input type="number" id="intervalInput" value="1" min="0.5" max="30" step="0.5" />
+          <span class="param-unit">хв</span>
+        </div>
+
+        <div class="param-field" title="Температура повітря в приміщенні (вважається сталою під час досліду)">
+          <label for="ambientInput">T<sub>навк</sub>:</label>
+          <input type="number" id="ambientInput" value="20" min="-10" max="50" step="0.5" />
+          <span class="param-unit">°C</span>
+        </div>
+
+        <button class="btn btn-primary" id="startBtn" title="Зафіксувати поточний час початку та сформувати часові відмітки">
+          ▶ Почати вимірювання
+        </button>
+
+        <div class="timer-widget" id="timerWidget" title="Відлік часу до наступного заміру">
+          <span class="timer-dot"></span>
+          <span>Наступний замір:</span>
+          <span class="timer-countdown" id="timerCountdown">--:--</span>
+          <button class="sound-btn" id="soundToggleBtn" title="Увімкнути/вимкнути звуковий сигнал таймера">🔔 Звук</button>
+        </div>
+      </div>
+
+      <div class="controls-group">
+        <a href="theory.html" target="_blank" rel="noopener" class="btn btn-cyan" title="Відкрити анімований теоретичний конспект у новій вкладці">
+          📖 Інтерактивний конспект ↗
+        </a>
+        <button class="btn btn-gold" id="demoDataBtn" title="Заповнити таблицю демонстраційними даними">
+          🧪 Тестові дані
+        </button>
+        <button class="btn btn-outline" id="exportCsvBtn" title="Завантажити таблицю вимірювань у форматі CSV (Excel)">
+          📥 Експорт CSV
+        </button>
+        <button class="btn btn-danger-outline" id="clearDataBtn" title="Очистити всі введені вимірювання">
+          🗑️ Очистити дані
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="workspace">
+      <!-- LEFT: SCROLLABLE DATA TABLE -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>Журнал температурних вимірювань</span>
+          </div>
+          <span class="status-pill" id="startTimeBadge">Очікування старту</span>
+        </div>
+
+        <div class="table-scroll-container" id="tableScrollContainer">
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th style="width: 42px;">№</th>
+                <th style="width: 96px;">Час<span class="th-sub">ГГ:ХХ:СС (хв)</span></th>
+                <th class="col-t1">
+                  <span class="th-badge" style="background: var(--gold);"></span>T₁ Утеплена
+                  <span class="th-sub">Тепловізор, °C</span>
+                </th>
+                <th class="col-t2">
+                  <span class="th-badge" style="background: var(--cyan);"></span>T₂ Неутеплена
+                  <span class="th-sub">Тепловізор, °C</span>
+                </th>
+                <th class="col-t3">
+                  <span class="th-badge" style="background: var(--primary);"></span>T₃ Неутеплена
+                  <span class="th-sub">Термопара (реф.), °C</span>
+                </th>
+                <th style="width: 68px;" title="Різниця між референсною термопарою та тепловізором на неутепленій чашці (T₃ - T₂)">
+                  ΔT<sub>пох</sub>
+                  <span class="th-sub">T₃ − T₂, °C</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Rows generated by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <span id="filledCountText">Заповнено рядків: 0 із 21</span>
+          <span>Навігація: <b>Enter</b> або <b>↑↓←→</b></span>
+        </div>
+      </section>
+
+      <!-- RIGHT: CHART & ENERGY ANALYTICS -->
+      <section class="right-column">
+        <div class="panel chart-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>Криві охолодження T(t) та апроксимація за законом Ньютона</span>
+            </div>
+            <span style="font-size: 11.5px; color: var(--text-muted);">
+              Суцільні — виміри | Пунктирні — тренд T(t) = T<sub>навк</sub> + ΔT₀·e<sup>−k·t</sup>
+            </span>
+          </div>
+
+          <div class="chart-legend-bar">
+            <div class="legend-items">
+              <span class="legend-item" data-series="t1">
+                <span class="legend-line" style="background: var(--gold);"></span>
+                <span>T₁ Утеплена (Тепловізор)</span>
+              </span>
+              <span class="legend-item" data-series="t2">
+                <span class="legend-line" style="background: var(--cyan);"></span>
+                <span>T₂ Неутеплена (Тепловізор)</span>
+              </span>
+              <span class="legend-item" data-series="t3">
+                <span class="legend-line" style="background: var(--primary);"></span>
+                <span>T₃ Термопара (Референс)</span>
+              </span>
+              <span class="legend-item" data-series="trends">
+                <span class="legend-line dashed" style="color: var(--dark);"></span>
+                <span>Експоненційні лінії тренду</span>
+              </span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);">Наведіть курсор на графік для деталей</span>
+          </div>
+
+          <div class="chart-canvas-wrap" id="chartContainer">
+            <canvas id="tempChart"></canvas>
+            <div class="chart-tooltip" id="chartTooltip"></div>
+          </div>
+        </div>
+
+        <!-- BOTTOM ANALYTICS CARDS -->
+        <div class="analytics-grid">
+          <!-- CARD 1: INTEGRAL AREA & INSULATION EFFECT -->
+          <div class="stat-card card-gold">
+            <div class="stat-header">
+              <span>Площа під графіком (Тепловізор)</span>
+              <span title="Інтеграл надлишкової температури ∫(T(t) - T_навк)dt за методом трапецій">∫(T − T<sub>навк</sub>)dt</span>
+            </div>
+            <div class="stat-main-row">
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted);">Різниця площ / Ефект утеплення:</div>
+                <div class="stat-big-value highlight-primary" id="areaSavingsPercent">— %</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 11px; color: var(--text-muted);">Скорочення ΔT охолодж.:</div>
+                <div style="font-size: 15px; font-weight: 700; color: var(--dark);" id="tempDropSaving">— %</div>
+              </div>
+            </div>
+            <div class="stat-sub-rows">
+              <div class="stat-row-item">
+                <span><b style="color: var(--gold-dark);">■</b> S₁ (Утеплена, над T<sub>навк</sub>):</span>
+                <strong id="areaT1Val">— °C·хв</strong>
+              </div>
+              <div class="stat-row-item">
+                <span><b style="color: var(--cyan-dark);">■</b> S₂ (Неутеплена, над T<sub>навк</sub>):</span>
+                <strong id="areaT2Val">— °C·хв</strong>
+              </div>
+              <div class="stat-row-item" style="color: var(--text-muted); font-size: 11px;">
+                <span>Повна площа ∫T(t)dt (S₁ / S₂):</span>
+                <span id="rawAreaVal">— / —</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 2: NEWTON'S LAW OF COOLING TRENDS -->
+          <div class="stat-card card-cyan">
+            <div class="stat-header">
+              <span>Експоненційні лінії тренду</span>
+              <span>Закон Ньютона</span>
+            </div>
+            <div class="stat-sub-rows" style="gap: 4px; margin-top: 2px;">
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:11px;">
+                  <span><b style="color: var(--gold-dark);">T₁ Утеплена:</b></span>
+                  <span id="r2T1">R² = —</span>
+                </div>
+                <div class="formula-tag" id="eqT1">Недостатньо точок (мін. 2)</div>
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:11px;">
+                  <span><b style="color: var(--cyan-dark);">T₂ Неутеплена (ІЧ):</b></span>
+                  <span id="r2T2">R² = —</span>
+                </div>
+                <div class="formula-tag" id="eqT2">Недостатньо точок (мін. 2)</div>
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:11px;">
+                  <span><b style="color: var(--primary);">T₃ Термопара:</b></span>
+                  <span id="r2T3">R² = —</span>
+                </div>
+                <div class="formula-tag" id="eqT3">Недостатньо точок (мін. 2)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 3: CONTACTLESS MEASUREMENT ACCURACY -->
+          <div class="stat-card card-primary">
+            <div class="stat-header">
+              <span>Порівняння з референсом (T₃ vs T₂)</span>
+              <span>Неутеплена чашка</span>
+            </div>
+            <div class="stat-main-row">
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted);">Сер. абсолютна похибка |ΔT|:</div>
+                <div class="stat-big-value highlight-cyan" id="maeVal">— °C</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 11px; color: var(--text-muted);">Відносна похибка δ:</div>
+                <div style="font-size: 16px; font-weight: 700; color: var(--primary);" id="mapeVal">— %</div>
+              </div>
+            </div>
+            <div class="stat-sub-rows">
+              <div class="stat-row-item">
+                <span>Втрата температури ΔT₁ (Утепл.):</span>
+                <strong id="dropT1Val">— °C</strong>
+              </div>
+              <div class="stat-row-item">
+                <span>Втрата температури ΔT₂ (Неутепл.):</span>
+                <strong id="dropT2Val">— °C</strong>
+              </div>
+              <div class="stat-row-item" style="font-size: 11px; color: var(--text-muted);">
+                <span>Оцінка ε поверхні (за T₂/T₃):</span>
+                <strong id="emissivityEstVal" style="color: var(--dark);">—</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- PROTECTIVE CONFIRMATION MODAL FOR CLEARING DATA -->
+  <div class="modal-backdrop" id="clearModal" role="dialog" aria-modal="true" aria-labelledby="clearModalTitle">
+    <div class="modal-box">
+      <div class="modal-title" id="clearModalTitle">
+        <span style="color: var(--primary); font-size: 20px;">⚠️</span>
+        <span>Підтвердження очищення даних</span>
+      </div>
+      <div class="modal-body">
+        Ви дійсно бажаєте видалити всі результати поточних вимірювань та скинути таймер лабораторної роботи?
+        <div class="modal-warning-box" id="modalStatsWarning">
+          У таблиці зараз заповнено <b>0</b> рядків. Після видалення відновити ці значення буде неможливо.
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="cancelClearBtn">Скасувати (залишити дані)</button>
+        <button class="btn btn-primary" id="confirmClearBtn">Так, очистити таблицю</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'thermo_lab_state_v1';
+
+      // DOM elements
+      const durationInput = document.getElementById('durationInput');
+      const intervalInput = document.getElementById('intervalInput');
+      const ambientInput = document.getElementById('ambientInput');
+      const startBtn = document.getElementById('startBtn');
+      const demoDataBtn = document.getElementById('demoDataBtn');
+      const exportCsvBtn = document.getElementById('exportCsvBtn');
+      const clearDataBtn = document.getElementById('clearDataBtn');
+      const saveStatusBadge = document.getElementById('saveStatusBadge');
+      const startTimeBadge = document.getElementById('startTimeBadge');
+      const tableBody = document.getElementById('tableBody');
+      const filledCountText = document.getElementById('filledCountText');
+      const timerWidget = document.getElementById('timerWidget');
+      const timerCountdown = document.getElementById('timerCountdown');
+      const soundToggleBtn = document.getElementById('soundToggleBtn');
+
+      // Analytics DOM
+      const areaSavingsPercent = document.getElementById('areaSavingsPercent');
+      const tempDropSaving = document.getElementById('tempDropSaving');
+      const areaT1Val = document.getElementById('areaT1Val');
+      const areaT2Val = document.getElementById('areaT2Val');
+      const rawAreaVal = document.getElementById('rawAreaVal');
+      const eqT1 = document.getElementById('eqT1');
+      const eqT2 = document.getElementById('eqT2');
+      const eqT3 = document.getElementById('eqT3');
+      const r2T1 = document.getElementById('r2T1');
+      const r2T2 = document.getElementById('r2T2');
+      const r2T3 = document.getElementById('r2T3');
+      const maeVal = document.getElementById('maeVal');
+      const mapeVal = document.getElementById('mapeVal');
+      const dropT1Val = document.getElementById('dropT1Val');
+      const dropT2Val = document.getElementById('dropT2Val');
+      const emissivityEstVal = document.getElementById('emissivityEstVal');
+
+      // Modal DOM
+      const clearModal = document.getElementById('clearModal');
+      const modalStatsWarning = document.getElementById('modalStatsWarning');
+      const cancelClearBtn = document.getElementById('cancelClearBtn');
+      const confirmClearBtn = document.getElementById('confirmClearBtn');
+
+      // Chart DOM
+      const canvas = document.getElementById('tempChart');
+      const ctx = canvas.getContext('2d');
+      const chartContainer = document.getElementById('chartContainer');
+      const chartTooltip = document.getElementById('chartTooltip');
+
+      // Application State
+      let state = {
+        durationMin: 20,
+        intervalMin: 1,
+        ambientTemp: 20,
+        startTimestampMs: null, // fixed when "Почати вимірювання" is clicked
+        isRunning: false,
+        soundEnabled: true,
+        rows: [] // [{ stepIndex, elapsedMin, timeLabel, t1: '', t2: '', t3: '' }]
+      };
+
+      let visibilitySeries = {
+        t1: true,
+        t2: true,
+        t3: true,
+        trends: true
+      };
+
+      let timerIntervalId = null;
+      let lastBeepStep = -1;
+      let hoverPointIndex = null;
+
+      // Format Date to HH:MM:SS
+      function formatTimeHMS(dateObj) {
+        const hh = String(dateObj.getHours()).padStart(2, '0');
+        const mm = String(dateObj.getMinutes()).padStart(2, '0');
+        const ss = String(dateObj.getSeconds()).padStart(2, '0');
+        return `${hh}:${mm}:${ss}`;
+      }
+
+      // Format relative minutes if not started yet
+      function formatRelativeHMS(minutesFloat) {
+        const totalSec = Math.round(minutesFloat * 60);
+        const mm = String(Math.floor(totalSec / 60)).padStart(2, '0');
+        const ss = String(totalSec % 60).padStart(2, '0');
+        return `+${mm}:${ss}`;
+      }
+
+      // Build or rebuild rows preserving existing values by step index
+      function syncRowsStructure() {
+        const dur = Math.max(1, Math.min(180, parseFloat(state.durationMin) || 20));
+        const intv = Math.max(0.25, Math.min(60, parseFloat(state.intervalMin) || 1));
+        const stepsCount = Math.floor(dur / intv + 1e-9);
+        const newRows = [];
+
+        for (let i = 0; i <= stepsCount; i++) {
+          const elapsedMin = Number((i * intv).toFixed(2));
+          const existing = state.rows[i] || {};
+          let timeLabel = formatRelativeHMS(elapsedMin);
+          if (state.startTimestampMs) {
+            const rowDate = new Date(state.startTimestampMs + Math.round(elapsedMin * 60 * 1000));
+            timeLabel = formatTimeHMS(rowDate);
+          }
+          newRows.push({
+            stepIndex: i,
+            elapsedMin: elapsedMin,
+            timeLabel: timeLabel,
+            t1: existing.t1 !== undefined ? existing.t1 : '',
+            t2: existing.t2 !== undefined ? existing.t2 : '',
+            t3: existing.t3 !== undefined ? existing.t3 : ''
+          });
+        }
+        state.rows = newRows;
+      }
+
+      // Save to localStorage
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          const nowStr = formatTimeHMS(new Date());
+          saveStatusBadge.textContent = `✓ Збережено (${nowStr})`;
+        } catch (err) {
+          saveStatusBadge.textContent = `⚠ Помилка збереження`;
+        }
+      }
+
+      // Load from localStorage
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            syncRowsStructure();
+            return;
+          }
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            state.durationMin = parsed.durationMin ?? 20;
+            state.intervalMin = parsed.intervalMin ?? 1;
+            state.ambientTemp = parsed.ambientTemp ?? 20;
+            state.startTimestampMs = parsed.startTimestampMs || null;
+            state.isRunning = Boolean(parsed.isRunning);
+            state.soundEnabled = parsed.soundEnabled !== undefined ? Boolean(parsed.soundEnabled) : true;
+            state.rows = Array.isArray(parsed.rows) ? parsed.rows : [];
+
+            durationInput.value = state.durationMin;
+            intervalInput.value = state.intervalMin;
+            ambientInput.value = state.ambientTemp;
+          }
+          syncRowsStructure();
+        } catch (e) {
+          syncRowsStructure();
+        }
+      }
+
+      // Web Audio beep for interval notification
+      function playNotificationBeep() {
+        if (!state.soundEnabled) return;
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+          const actx = new AudioCtx();
+          const osc = actx.createOscillator();
+          const gain = actx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, actx.currentTime);
+          osc.frequency.setValueAtTime(1174.66, actx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.12, actx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.35);
+          osc.connect(gain);
+          gain.connect(actx.destination);
+          osc.start();
+          osc.stop(actx.currentTime + 0.36);
+        } catch (_) {}
+      }
+
+      // Render Table
+      function renderTable() {
+        tableBody.innerHTML = '';
+
+        state.rows.forEach((row, idx) => {
+          const tr = document.createElement('tr');
+          tr.dataset.rowIndex = idx;
+
+          const hasAllThree = row.t1 !== '' && row.t2 !== '' && row.t3 !== '';
+          if (hasAllThree) tr.classList.add('completed-row');
+
+          // Compute diff T3 - T2
+          let diffText = '—';
+          const v2 = parseFloat(row.t2);
+          const v3 = parseFloat(row.t3);
+          if (!isNaN(v2) && !isNaN(v3)) {
+            const diff = v3 - v2;
+            const sign = diff > 0 ? '+' : '';
+            diffText = `${sign}${diff.toFixed(1)}`;
+          }
+
+          tr.innerHTML = `
+            <td class="cell-index">${idx + 1}</td>
+            <td class="cell-time">
+              <span>${row.timeLabel}</span>
+              <span class="rel-min">(${row.elapsedMin} хв)</span>
+            </td>
+            <td>
+              <input type="number" step="0.1" min="-20" max="150"
+                class="temp-input input-t1"
+                data-row="${idx}" data-col="t1"
+                placeholder="°C"
+                value="${row.t1}" />
+            </td>
+            <td>
+              <input type="number" step="0.1" min="-20" max="150"
+                class="temp-input input-t2"
+                data-row="${idx}" data-col="t2"
+                placeholder="°C"
+                value="${row.t2}" />
+            </td>
+            <td>
+              <input type="number" step="0.1" min="-20" max="150"
+                class="temp-input input-t3"
+                data-row="${idx}" data-col="t3"
+                placeholder="°C"
+                value="${row.t3}" />
+            </td>
+            <td class="cell-diff" id="diff-cell-${idx}">${diffText}</td>
+          `;
+
+          tableBody.appendChild(tr);
+        });
+
+        updateHeaderStatusAndCounts();
+        highlightActiveTimerRow();
+      }
+
+      function updateRowDiffAndStatus(idx) {
+        const row = state.rows[idx];
+        if (!row) return;
+        const diffCell = document.getElementById(`diff-cell-${idx}`);
+        const tr = tableBody.querySelector(`tr[data-row-index="${idx}"]`);
+        const v2 = parseFloat(row.t2);
+        const v3 = parseFloat(row.t3);
+        if (diffCell) {
+          if (!isNaN(v2) && !isNaN(v3)) {
+            const diff = v3 - v2;
+            const sign = diff > 0 ? '+' : '';
+            diffCell.textContent = `${sign}${diff.toFixed(1)}`;
+          } else {
+            diffCell.textContent = '—';
+          }
+        }
+        if (tr) {
+          const hasAll = row.t1 !== '' && row.t2 !== '' && row.t3 !== '';
+          tr.classList.toggle('completed-row', hasAll);
+        }
+        updateHeaderStatusAndCounts();
+      }
+
+      function countFilledRows() {
+        return state.rows.filter(r => r.t1 !== '' || r.t2 !== '' || r.t3 !== '').length;
+      }
+
+      function updateHeaderStatusAndCounts() {
+        const filled = countFilledRows();
+        filledCountText.textContent = `Заповнено рядків: ${filled} із ${state.rows.length}`;
+
+        if (state.startTimestampMs) {
+          const startStr = formatTimeHMS(new Date(state.startTimestampMs));
+          const endStr = state.rows.length ? state.rows[state.rows.length - 1].timeLabel : '';
+          startTimeBadge.textContent = `Старт: ${startStr} → ${endStr}`;
+          startTimeBadge.classList.add('started');
+          startBtn.textContent = '↻ Оновити час старту';
+        } else {
+          startTimeBadge.textContent = 'Час ще не зафіксовано';
+          startTimeBadge.classList.remove('started');
+          startBtn.textContent = '▶ Почати вимірювання';
+        }
+
+        soundToggleBtn.textContent = state.soundEnabled ? '🔔 Звук: Увімк' : '🔕 Звук: Вимк';
+      }
+
+      // Delegate table input events & keyboard navigation
+      tableBody.addEventListener('input', (e) => {
+        const target = e.target;
+        if (!target.classList.contains('temp-input')) return;
+        const rIdx = parseInt(target.dataset.row, 10);
+        const col = target.dataset.col;
+        if (isNaN(rIdx) || !state.rows[rIdx]) return;
+
+        state.rows[rIdx][col] = target.value.trim();
+        updateRowDiffAndStatus(rIdx);
+        saveState();
+        recalculateAndDraw();
+      });
+
+      tableBody.addEventListener('keydown', (e) => {
+        const target = e.target;
+        if (!target.classList.contains('temp-input')) return;
+        const rIdx = parseInt(target.dataset.row, 10);
+        const col = target.dataset.col;
+        const colsOrder = ['t1', 't2', 't3'];
+        const cIdx = colsOrder.indexOf(col);
+
+        let nextRow = rIdx;
+        let nextCol = cIdx;
+
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (cIdx < 2) {
+            nextCol = cIdx + 1;
+          } else {
+            nextCol = 0;
+            nextRow = Math.min(state.rows.length - 1, rIdx + 1);
+          }
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          nextRow = Math.min(state.rows.length - 1, rIdx + 1);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          nextRow = Math.max(0, rIdx - 1);
+        } else {
+          return;
+        }
+
+        const nextInput = tableBody.querySelector(
+          `input[data-row="${nextRow}"][data-col="${colsOrder[nextCol]}"]`
+        );
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        }
+      });
+
+      // TIMER LOGIC
+      function startTimerLoop() {
+        if (timerIntervalId) clearInterval(timerIntervalId);
+        timerIntervalId = setInterval(updateTimerTick, 500);
+        updateTimerTick();
+      }
+
+      function highlightActiveTimerRow(activeIndex = -1) {
+        const allRows = tableBody.querySelectorAll('tr');
+        allRows.forEach((tr, idx) => {
+          tr.classList.toggle('active-row', idx === activeIndex);
+        });
+      }
+
+      function updateTimerTick() {
+        if (!state.isRunning || !state.startTimestampMs) {
+          timerWidget.classList.remove('active');
+          timerCountdown.textContent = '--:--';
+          highlightActiveTimerRow(-1);
+          return;
+        }
+
+        const nowMs = Date.now();
+        const elapsedSec = (nowMs - state.startTimestampMs) / 1000;
+        const totalDurationSec = state.durationMin * 60;
+        const intervalSec = state.intervalMin * 60;
+
+        if (elapsedSec >= totalDurationSec + intervalSec) {
+          timerWidget.classList.remove('active');
+          timerCountdown.textContent = 'Завершено';
+          highlightActiveTimerRow(state.rows.length - 1);
+          return;
+        }
+
+        timerWidget.classList.add('active');
+        const currentStep = Math.floor(elapsedSec / intervalSec);
+        const nextStep = Math.min(state.rows.length - 1, currentStep + 1);
+        const nextStepTimeSec = nextStep * intervalSec;
+        const remainingSec = Math.max(0, Math.ceil(nextStepTimeSec - elapsedSec));
+
+        const mm = String(Math.floor(remainingSec / 60)).padStart(2, '0');
+        const ss = String(remainingSec % 60).padStart(2, '0');
+        timerCountdown.textContent = `${mm}:${ss}`;
+
+        const rowToHighlight = Math.min(state.rows.length - 1, Math.max(0, currentStep));
+        highlightActiveTimerRow(rowToHighlight);
+
+        if (currentStep > 0 && currentStep !== lastBeepStep && (elapsedSec % intervalSec) < 1.2) {
+          lastBeepStep = currentStep;
+          playNotificationBeep();
+        }
+      }
+
+      // MATHEMATICAL CALCULATIONS
+      // Extract valid points [{ t, y }]
+      function getSeriesPoints(colKey) {
+        const pts = [];
+        for (const r of state.rows) {
+          const val = parseFloat(r[colKey]);
+          if (!isNaN(val)) {
+            pts.push({ t: r.elapsedMin, y: val, timeLabel: r.timeLabel });
+          }
+        }
+        return pts;
+      }
+
+      /**
+       * Fit Newton's Law of Cooling: T(t) = T_amb + dT0 * exp(-k * t)
+       * Using weighted linear regression on ln(T - T_amb) = ln(dT0) - k*t
+       * If temperatures are <= T_amb, falls back to standard exponential T(t) = A * exp(-k * t)
+       */
+      function fitNewtonCooling(points, tAmb) {
+        if (!points || points.length < 2) return null;
+
+        const validAboveAmb = points.filter(p => p.y > tAmb + 0.2);
+        if (validAboveAmb.length >= 2) {
+          let sumT = 0, sumLn = 0, sumTT = 0, sumTLn = 0, sumW = 0;
+          for (const p of validAboveAmb) {
+            const diff = p.y - tAmb;
+            const lnY = Math.log(diff);
+            // Weight by (T - T_amb) to prevent low-temperature log distortion
+            const w = diff;
+            sumW += w;
+            sumT += w * p.t;
+            sumLn += w * lnY;
+            sumTT += w * p.t * p.t;
+            sumTLn += w * p.t * lnY;
+          }
+          const denom = sumW * sumTT - sumT * sumT;
+          if (Math.abs(denom) > 1e-12) {
+            const slope = (sumW * sumTLn - sumT * sumLn) / denom;
+            const intercept = (sumLn - slope * sumT) / sumW;
+            const k = -slope;
+            const dT0 = Math.exp(intercept);
+
+            const predict = (t) => tAmb + dT0 * Math.exp(-k * t);
+
+            // Calculate R^2
+            const meanY = points.reduce((acc, p) => acc + p.y, 0) / points.length;
+            let ssRes = 0, ssTot = 0;
+            for (const p of points) {
+              const yHat = predict(p.t);
+              ssRes += Math.pow(p.y - yHat, 2);
+              ssTot += Math.pow(p.y - meanY, 2);
+            }
+            const r2 = ssTot > 1e-9 ? Math.max(0, 1 - ssRes / ssTot) : 1;
+
+            const kSign = k >= 0 ? `−${Math.abs(k).toFixed(4)}` : `+${Math.abs(k).toFixed(4)}`;
+            const formulaStr = `T(t) = ${tAmb.toFixed(1)} + ${dT0.toFixed(1)}·e^(${kSign}·t)`;
+
+            return {
+              type: 'newton',
+              tAmb,
+              dT0,
+              k,
+              r2,
+              predict,
+              formulaStr
+            };
+          }
+        }
+
+        // Fallback: standard exponential T(t) = A * exp(-k*t) for positive temperatures
+        const posPts = points.filter(p => p.y > 0.1);
+        if (posPts.length >= 2) {
+          const n = posPts.length;
+          let sumT = 0, sumLn = 0, sumTT = 0, sumTLn = 0;
+          for (const p of posPts) {
+            const lnY = Math.log(p.y);
+            sumT += p.t;
+            sumLn += lnY;
+            sumTT += p.t * p.t;
+            sumTLn += p.t * lnY;
+          }
+          const denom = n * sumTT - sumT * sumT;
+          if (Math.abs(denom) > 1e-12) {
+            const slope = (n * sumTLn - sumT * sumLn) / denom;
+            const intercept = (sumLn - slope * sumT) / n;
+            const k = -slope;
+            const A = Math.exp(intercept);
+            const predict = (t) => A * Math.exp(-k * t);
+            const meanY = points.reduce((acc, p) => acc + p.y, 0) / points.length;
+            let ssRes = 0, ssTot = 0;
+            for (const p of points) {
+              ssRes += Math.pow(p.y - predict(p.t), 2);
+              ssTot += Math.pow(p.y - meanY, 2);
+            }
+            const r2 = ssTot > 1e-9 ? Math.max(0, 1 - ssRes / ssTot) : 1;
+            const kSign = k >= 0 ? `−${Math.abs(k).toFixed(4)}` : `+${Math.abs(k).toFixed(4)}`;
+            return {
+              type: 'exp',
+              dT0: A,
+              k,
+              r2,
+              predict,
+              formulaStr: `T(t) = ${A.toFixed(1)}·e^(${kSign}·t)`
+            };
+          }
+        }
+        return null;
+      }
+
+      // Numerical integration by trapezoidal rule
+      function computeTrapezoidalArea(points, baseline = 0) {
+        if (!points || points.length < 2) return null;
+        let area = 0;
+        for (let i = 1; i < points.length; i++) {
+          const dt = points[i].t - points[i - 1].t;
+          const y0 = Math.max(0, points[i - 1].y - baseline);
+          const y1 = Math.max(0, points[i].y - baseline);
+          area += 0.5 * (y0 + y1) * dt;
+        }
+        return area;
+      }
+
+      // Recalculate metrics and update UI + Canvas
+      function recalculateAndDraw() {
+        const tAmb = parseFloat(state.ambientTemp) || 20;
+        const pts1 = getSeriesPoints('t1'); // Insulated (IR)
+        const pts2 = getSeriesPoints('t2'); // Uninsulated (IR)
+        const pts3 = getSeriesPoints('t3'); // Uninsulated (Thermocouple)
+
+        const fit1 = fitNewtonCooling(pts1, tAmb);
+        const fit2 = fitNewtonCooling(pts2, tAmb);
+        const fit3 = fitNewtonCooling(pts3, tAmb);
+
+        // Update Trend Cards
+        if (fit1) {
+          eqT1.textContent = fit1.formulaStr;
+          r2T1.textContent = `R² = ${fit1.r2.toFixed(3)} | k = ${fit1.k.toFixed(4)} хв⁻¹`;
+        } else {
+          eqT1.textContent = 'Недостатньо точок (мін. 2)';
+          r2T1.textContent = 'R² = —';
+        }
+
+        if (fit2) {
+          eqT2.textContent = fit2.formulaStr;
+          r2T2.textContent = `R² = ${fit2.r2.toFixed(3)} | k = ${fit2.k.toFixed(4)} хв⁻¹`;
+        } else {
+          eqT2.textContent = 'Недостатньо точок (мін. 2)';
+          r2T2.textContent = 'R² = —';
+        }
+
+        if (fit3) {
+          eqT3.textContent = fit3.formulaStr;
+          r2T3.textContent = `R² = ${fit3.r2.toFixed(3)} | k = ${fit3.k.toFixed(4)} хв⁻¹`;
+        } else {
+          eqT3.textContent = 'Недостатньо точок (мін. 2)';
+          r2T3.textContent = 'R² = —';
+        }
+
+        // Areas under curves (excess temperature above T_amb and raw integral)
+        const area1Excess = computeTrapezoidalArea(pts1, tAmb);
+        const area2Excess = computeTrapezoidalArea(pts2, tAmb);
+        const area1Raw = computeTrapezoidalArea(pts1, 0);
+        const area2Raw = computeTrapezoidalArea(pts2, 0);
+
+        areaT1Val.textContent = area1Excess !== null ? `${area1Excess.toFixed(1)} °C·хв` : '— °C·хв';
+        areaT2Val.textContent = area2Excess !== null ? `${area2Excess.toFixed(1)} °C·хв` : '— °C·хв';
+        rawAreaVal.textContent =
+          (area1Raw !== null ? area1Raw.toFixed(0) : '—') +
+          ' / ' +
+          (area2Raw !== null ? area2Raw.toFixed(0) : '—') +
+          ' °C·хв';
+
+        if (area1Excess !== null && area2Excess !== null && Math.max(area1Excess, area2Excess) > 0) {
+          const diffPct = (Math.abs(area2Excess - area1Excess) / Math.max(area1Excess, area2Excess)) * 100;
+          areaSavingsPercent.textContent = `${diffPct.toFixed(1)} %`;
+        } else {
+          areaSavingsPercent.textContent = '— %';
+        }
+
+        // Temperature drop ΔT = T_start - T_end for both cups
+        let dT1 = null, dT2 = null;
+        if (pts1.length >= 2) {
+          dT1 = pts1[0].y - pts1[pts1.length - 1].y;
+          dropT1Val.textContent = `${dT1.toFixed(1)} °C (${pts1[0].y.toFixed(1)}→${pts1[pts1.length - 1].y.toFixed(1)})`;
+        } else {
+          dropT1Val.textContent = '— °C';
+        }
+
+        if (pts2.length >= 2) {
+          dT2 = pts2[0].y - pts2[pts2.length - 1].y;
+          dropT2Val.textContent = `${dT2.toFixed(1)} °C (${pts2[0].y.toFixed(1)}→${pts2[pts2.length - 1].y.toFixed(1)})`;
+        } else {
+          dropT2Val.textContent = '— °C';
+        }
+
+        if (dT1 !== null && dT2 !== null && Math.max(Math.abs(dT1), Math.abs(dT2)) > 0.1) {
+          const savedHeatPct = ((dT2 - dT1) / Math.max(Math.abs(dT1), Math.abs(dT2))) * 100;
+          const sign = savedHeatPct >= 0 ? '' : '−';
+          tempDropSaving.textContent = `${sign}${Math.abs(savedHeatPct).toFixed(1)} %`;
+        } else {
+          tempDropSaving.textContent = '— %';
+        }
+
+        // Contactless error (T3 thermocouple vs T2 thermal camera on uninsulated cup)
+        let sumAbsErr = 0, sumRelErr = 0, sumEps = 0, pairCount = 0;
+        const tAmbK = tAmb + 273.15;
+        for (const r of state.rows) {
+          const v2 = parseFloat(r.t2);
+          const v3 = parseFloat(r.t3);
+          if (!isNaN(v2) && !isNaN(v3) && Math.abs(v3) > 0.1) {
+            const err = Math.abs(v3 - v2);
+            sumAbsErr += err;
+            sumRelErr += (err / Math.abs(v3)) * 100;
+            // Effective emissivity ratio estimate based on Stefan-Boltzmann (T_cam^4 - T_amb^4)/(T_true^4 - T_amb^4)
+            const t2K = v2 + 273.15;
+            const t3K = v3 + 273.15;
+            const denomK = Math.pow(t3K, 4) - Math.pow(tAmbK, 4);
+            if (Math.abs(denomK) > 1e5) {
+              const eps = (Math.pow(t2K, 4) - Math.pow(tAmbK, 4)) / denomK;
+              if (eps > 0.1 && eps <= 1.2) sumEps += eps;
+            }
+            pairCount++;
+          }
+        }
+
+        if (pairCount > 0) {
+          maeVal.textContent = `${(sumAbsErr / pairCount).toFixed(2)} °C`;
+          mapeVal.textContent = `${(sumRelErr / pairCount).toFixed(1)} %`;
+          const avgEps = sumEps / pairCount;
+          emissivityEstVal.textContent = avgEps > 0.1 ? `≈ ${Math.min(1, avgEps).toFixed(2)}` : '—';
+        } else {
+          maeVal.textContent = '— °C';
+          mapeVal.textContent = '— %';
+          emissivityEstVal.textContent = '—';
+        }
+
+        drawChart({ pts1, pts2, pts3, fit1, fit2, fit3, tAmb });
+      }
+
+      // HIGH-DPI INTERACTIVE CANVAS CHART
+      let latestChartModel = null;
+
+      function drawChart(model) {
+        if (model) latestChartModel = model;
+        if (!latestChartModel) return;
+
+        const { pts1, pts2, pts3, fit1, fit2, fit3, tAmb } = latestChartModel;
+
+        const rect = chartContainer.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const width = Math.max(300, rect.width - 20);
+        const height = Math.max(200, rect.height - 10);
+
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+
+        ctx.save();
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, width, height);
+
+        const padLeft = 48;
+        const padRight = 20;
+        const padTop = 18;
+        const padBottom = 38;
+        const plotW = width - padLeft - padRight;
+        const plotH = height - padTop - padBottom;
+
+        const maxTime = Math.max(1, parseFloat(state.durationMin) || 20);
+
+        // Determine Y range
+        const allY = [tAmb, tAmb + 10];
+        if (visibilitySeries.t1) pts1.forEach(p => allY.push(p.y));
+        if (visibilitySeries.t2) pts2.forEach(p => allY.push(p.y));
+        if (visibilitySeries.t3) pts3.forEach(p => allY.push(p.y));
+
+        if (allY.length <= 2) {
+          allY.push(95); // default scale up to boiling water
+        }
+
+        const minVal = Math.min(...allY);
+        const maxVal = Math.max(...allY);
+        const yMin = Math.floor(Math.min(tAmb - 5, minVal - 4) / 5) * 5;
+        const yMax = Math.ceil((maxVal + 5) / 5) * 5;
+
+        const xToPx = (t) => padLeft + (t / maxTime) * plotW;
+        const yToPx = (y) => padTop + plotH - ((y - yMin) / Math.max(1, yMax - yMin)) * plotH;
+
+        // Grid lines (Y)
+        ctx.font = '500 11px "Fira Sans", sans-serif';
+        ctx.fillStyle = '#6b6b6b';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+
+        const ySteps = 6;
+        for (let i = 0; i <= ySteps; i++) {
+          const val = yMin + (i / ySteps) * (yMax - yMin);
+          const py = yToPx(val);
+          ctx.strokeStyle = '#eeeeee';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(padLeft, py);
+          ctx.lineTo(padLeft + plotW, py);
+          ctx.stroke();
+          ctx.fillText(`${val.toFixed(0)}°`, padLeft - 7, py);
+        }
+
+        // Grid lines (X)
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        const totalRows = state.rows.length;
+        const labelEvery = Math.max(1, Math.ceil(totalRows / 10));
+
+        state.rows.forEach((r, idx) => {
+          const px = xToPx(r.elapsedMin);
+          if (idx % labelEvery === 0 || idx === totalRows - 1) {
+            ctx.strokeStyle = '#f1f1f1';
+            ctx.beginPath();
+            ctx.moveTo(px, padTop);
+            ctx.lineTo(px, padTop + plotH);
+            ctx.stroke();
+
+            const shortTime = r.timeLabel.length > 5 ? r.timeLabel.slice(0, 5) : r.timeLabel;
+            ctx.fillStyle = '#444';
+            ctx.fillText(`${r.elapsedMin} хв`, px, padTop + plotH + 6);
+            ctx.fillStyle = '#888';
+            ctx.font = '400 10px "Fira Sans", sans-serif';
+            ctx.fillText(shortTime, px, padTop + plotH + 20);
+            ctx.font = '500 11px "Fira Sans", sans-serif';
+          }
+        });
+
+        // Ambient temperature horizontal line
+        if (tAmb >= yMin && tAmb <= yMax) {
+          const pyAmb = yToPx(tAmb);
+          ctx.save();
+          ctx.strokeStyle = '#888888';
+          ctx.lineWidth = 1.2;
+          ctx.setLineDash([5, 4]);
+          ctx.beginPath();
+          ctx.moveTo(padLeft, pyAmb);
+          ctx.lineTo(padLeft + plotW, pyAmb);
+          ctx.stroke();
+          ctx.fillStyle = '#555';
+          ctx.font = '600 10.5px "Fira Sans", sans-serif';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(`T_навк = ${tAmb}°C`, padLeft + 6, pyAmb - 3);
+          ctx.restore();
+        }
+
+        // Shaded area under/between thermal imager curves (T1 and T2)
+        if (visibilitySeries.t1 && pts1.length >= 2) {
+          ctx.save();
+          ctx.fillStyle = 'rgba(251, 186, 0, 0.10)';
+          ctx.beginPath();
+          const basePy = yToPx(Math.max(yMin, tAmb));
+          ctx.moveTo(xToPx(pts1[0].t), basePy);
+          pts1.forEach(p => ctx.lineTo(xToPx(p.t), yToPx(p.y)));
+          ctx.lineTo(xToPx(pts1[pts1.length - 1].t), basePy);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+
+        if (visibilitySeries.t2 && pts2.length >= 2) {
+          ctx.save();
+          ctx.fillStyle = 'rgba(62, 177, 200, 0.10)';
+          ctx.beginPath();
+          const basePy = yToPx(Math.max(yMin, tAmb));
+          ctx.moveTo(xToPx(pts2[0].t), basePy);
+          pts2.forEach(p => ctx.lineTo(xToPx(p.t), yToPx(p.y)));
+          ctx.lineTo(xToPx(pts2[pts2.length - 1].t), basePy);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // Helper to draw Newton exponential trendline (dashed)
+        function drawTrendCurve(fitObj, colorHex) {
+          if (!fitObj || !visibilitySeries.trends) return;
+          ctx.save();
+          ctx.strokeStyle = colorHex;
+          ctx.lineWidth = 1.8;
+          ctx.setLineDash([6, 4]);
+          ctx.globalAlpha = 0.85;
+          ctx.beginPath();
+          const samples = 80;
+          for (let s = 0; s <= samples; s++) {
+            const t = (s / samples) * maxTime;
+            const y = fitObj.predict(t);
+            const px = xToPx(t);
+            const py = yToPx(y);
+            if (s === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Helper to draw solid measured curve + markers
+        function drawMeasuredSeries(pts, colorHex) {
+          if (!pts || pts.length === 0) return;
+          ctx.save();
+          ctx.strokeStyle = colorHex;
+          ctx.lineWidth = 2.6;
+          ctx.lineJoin = 'round';
+          ctx.lineCap = 'round';
+          if (pts.length >= 2) {
+            ctx.beginPath();
+            pts.forEach((p, idx) => {
+              const px = xToPx(p.t);
+              const py = yToPx(p.y);
+              if (idx === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+          }
+
+          // Points
+          pts.forEach(p => {
+            const px = xToPx(p.t);
+            const py = yToPx(p.y);
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = colorHex;
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            ctx.arc(px, py, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          });
+          ctx.restore();
+        }
+
+        // Draw trends first, then solid curves
+        if (visibilitySeries.t1) drawTrendCurve(fit1, '#c99400');
+        if (visibilitySeries.t2) drawTrendCurve(fit2, '#258da2');
+        if (visibilitySeries.t3) drawTrendCurve(fit3, '#a0001b');
+
+        if (visibilitySeries.t1) drawMeasuredSeries(pts1, '#fbba00');
+        if (visibilitySeries.t2) drawMeasuredSeries(pts2, '#3eb1c8');
+        if (visibilitySeries.t3) drawMeasuredSeries(pts3, '#a0001b');
+
+        // Axes border
+        ctx.strokeStyle = '#2a2a2a';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(padLeft, padTop);
+        ctx.lineTo(padLeft, padTop + plotH);
+        ctx.lineTo(padLeft + plotW, padTop + plotH);
+        ctx.stroke();
+
+        // Empty state hint if no points entered
+        if (pts1.length === 0 && pts2.length === 0 && pts3.length === 0) {
+          ctx.fillStyle = '#6b6b6b';
+          ctx.font = '500 13.5px "Fira Sans", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(
+            'Введіть значення температур у таблицю ліворуч або натисніть «🧪 Тестові дані»',
+            padLeft + plotW / 2,
+            padTop + plotH / 2
+          );
+        }
+
+        // Hover vertical line
+        if (hoverPointIndex !== null && state.rows[hoverPointIndex]) {
+          const r = state.rows[hoverPointIndex];
+          const px = xToPx(r.elapsedMin);
+          ctx.save();
+          ctx.strokeStyle = 'rgba(42, 42, 42, 0.35)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(px, padTop);
+          ctx.lineTo(px, padTop + plotH);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        ctx.restore();
+      }
+
+      // Interactive hover tooltip on Chart
+      canvas.addEventListener('mousemove', (e) => {
+        if (!state.rows.length) return;
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        const padLeft = 48;
+        const padRight = 20;
+        const plotW = rect.width - padLeft - padRight;
+        if (mx < padLeft - 10 || mx > padLeft + plotW + 10) {
+          hoverPointIndex = null;
+          chartTooltip.style.display = 'none';
+          drawChart();
+          return;
+        }
+
+        const maxTime = Math.max(1, parseFloat(state.durationMin) || 20);
+        const hoveredTime = ((mx - padLeft) / plotW) * maxTime;
+
+        // Find nearest row
+        let bestIdx = 0;
+        let bestDist = Infinity;
+        state.rows.forEach((r, idx) => {
+          const d = Math.abs(r.elapsedMin - hoveredTime);
+          if (d < bestDist) {
+            bestDist = d;
+            bestIdx = idx;
+          }
+        });
+
+        hoverPointIndex = bestIdx;
+        const r = state.rows[bestIdx];
+
+        const t1Str = r.t1 !== '' ? `${ parseFloat(r.t1).toFixed(1) } °C` : '—';
+        const t2Str = r.t2 !== '' ? `${ parseFloat(r.t2).toFixed(1) } °C` : '—';
+        const t3Str = r.t3 !== '' ? `${ parseFloat(r.t3).toFixed(1) } °C` : '—';
+
+        chartTooltip.innerHTML = `
+          <div style="font-weight:700; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:3px; margin-bottom:4px;">
+            Замір №${bestIdx + 1} | ${r.timeLabel} (${r.elapsedMin} хв)
+          </div>
+          <div><span style="color:#fbba00;">●</span> Утеплена (ІЧ): <b>${t1Str}</b></div>
+          <div><span style="color:#3eb1c8;">●</span> Неутеплена (ІЧ): <b>${t2Str}</b></div>
+          <div><span style="color:#ff6b81;">●</span> Термопара (Реф.): <b>${t3Str}</b></div>
+        `;
+        chartTooltip.style.display = 'block';
+
+        const tooltipW = 210;
+        const leftPos = (mx + tooltipW + 24 < rect.width) ? (mx + 14) : (mx - tooltipW - 10);
+        const topPos = Math.max(10, Math.min(rect.height - 95, my - 20));
+        chartTooltip.style.left = `${leftPos}px`;
+        chartTooltip.style.top = `${topPos}px`;
+
+        drawChart();
+      });
+
+      canvas.addEventListener('mouseleave', () => {
+        hoverPointIndex = null;
+        chartTooltip.style.display = 'none';
+        drawChart();
+      });
+
+      // Legend toggle clicks
+      document.querySelectorAll('.legend-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const key = item.dataset.series;
+          if (!key) return;
+          visibilitySeries[key] = !visibilitySeries[key];
+          item.classList.toggle('dimmed', !visibilitySeries[key]);
+          drawChart();
+        });
+      });
+
+      // Controls Handlers
+      function handleParamsChange() {
+        state.durationMin = Math.max(1, Math.min(180, parseFloat(durationInput.value) || 20));
+        state.intervalMin = Math.max(0.25, Math.min(60, parseFloat(intervalInput.value) || 1));
+        state.ambientTemp = parseFloat(ambientInput.value);
+        if (isNaN(state.ambientTemp)) state.ambientTemp = 20;
+
+        syncRowsStructure();
+        saveState();
+        renderTable();
+        recalculateAndDraw();
+      }
+
+      durationInput.addEventListener('change', handleParamsChange);
+      intervalInput.addEventListener('change', handleParamsChange);
+      ambientInput.addEventListener('input', () => {
+        const val = parseFloat(ambientInput.value);
+        if (!isNaN(val)) {
+          state.ambientTemp = val;
+          saveState();
+          recalculateAndDraw();
+        }
+      });
+
+      // "Почати вимірювання" Button
+      startBtn.addEventListener('click', () => {
+        state.durationMin = Math.max(1, Math.min(180, parseFloat(durationInput.value) || 20));
+        state.intervalMin = Math.max(0.25, Math.min(60, parseFloat(intervalInput.value) || 1));
+        state.startTimestampMs = Date.now();
+        state.isRunning = true;
+        lastBeepStep = 0;
+
+        syncRowsStructure();
+        saveState();
+        renderTable();
+        recalculateAndDraw();
+        updateTimerTick();
+
+        // Focus first input of row 0
+        const firstInput = tableBody.querySelector('input[data-row="0"][data-col="t1"]');
+        if (firstInput) firstInput.focus();
+      });
+
+      // Sound toggle
+      soundToggleBtn.addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        saveState();
+        updateHeaderStatusAndCounts();
+      });
+
+      // Demo Data Generator (Realistic cooling curves for insulated vs uninsulated cup + thermocouple)
+      demoDataBtn.addEventListener('click', () => {
+        if (!state.startTimestampMs) {
+          state.startTimestampMs = Date.now();
+          state.isRunning = true;
+        }
+        const tAmb = parseFloat(state.ambientTemp) || 20;
+        syncRowsStructure();
+
+        // Physics parameters:
+        // T3 (Thermocouple inside uninsulated cup): starts at ~92.5°C, k3 = 0.032 min^-1
+        // T2 (Thermal Imager on uninsulated cup outer wall): ~3.8°C lower due to wall gradient & ceramic emissivity (~0.92), k2 = 0.033 min^-1
+        // T1 (Thermal Imager on insulated cup with saucer & cardboard coaster): cools ~42% slower (k1 = 0.019 min^-1)
+        state.rows.forEach((r, idx) => {
+          const t = r.elapsedMin;
+          // Deterministic small pseudo-noise so it looks like real student measurements
+          const n1 = Math.sin(idx * 1.7) * 0.18;
+          const n2 = Math.cos(idx * 2.3) * 0.22;
+          const n3 = Math.sin(idx * 1.1 + 0.5) * 0.15;
+
+          const val3 = tAmb + (92.6 - tAmb) * Math.exp(-0.0325 * t) + n3;
+          const val2 = tAmb + (88.4 - tAmb) * Math.exp(-0.0335 * t) + n2;
+          const val1 = tAmb + (89.0 - tAmb) * Math.exp(-0.0192 * t) + n1;
+
+          r.t1 = val1.toFixed(1);
+          r.t2 = val2.toFixed(1);
+          r.t3 = val3.toFixed(1);
+        });
+
+        saveState();
+        renderTable();
+        recalculateAndDraw();
+      });
+
+      // Export CSV
+      exportCsvBtn.addEventListener('click', () => {
+        const lines = [];
+        lines.push([
+          '№',
+          'Час (ГГ:ХХ:СС)',
+          'Час від старту (хв)',
+          'T1 Утеплена (Тепловізор) °C',
+          'T2 Неутеплена (Тепловізор) °C',
+          'T3 Неутеплена (Термопара) °C',
+          'Різниця (T3 - T2) °C'
+        ].join(';'));
+
+        state.rows.forEach((r, idx) => {
+          const v2 = parseFloat(r.t2);
+          const v3 = parseFloat(r.t3);
+          const diff = (!isNaN(v2) && !isNaN(v3)) ? (v3 - v2).toFixed(1) : '';
+          lines.push([
+            idx + 1,
+            r.timeLabel,
+            String(r.elapsedMin).replace('.', ','),
+            String(r.t1).replace('.', ','),
+            String(r.t2).replace('.', ','),
+            String(r.t3).replace('.', ','),
+            String(diff).replace('.', ',')
+          ].join(';'));
+        });
+
+        lines.push('');
+        lines.push(`Температура довкілля T_навк (°C);${state.ambientTemp}`);
+        lines.push(`Площа S1 Утеплена над T_навк (°C*хв);${areaT1Val.textContent}`);
+        lines.push(`Площа S2 Неутеплена над T_навк (°C*хв);${areaT2Val.textContent}`);
+        lines.push(`Різниця площ (%);${areaSavingsPercent.textContent}`);
+        lines.push(`Рівняння T1;${eqT1.textContent}`);
+        lines.push(`Рівняння T2;${eqT2.textContent}`);
+        lines.push(`Рівняння T3;${eqT3.textContent}`);
+
+        const csvContent = '\uFEFF' + lines.join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `termo_lab_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      // PROTECTIVE CLEAR MODAL HANDLERS
+      function openClearModal() {
+        const filled = countFilledRows();
+        modalStatsWarning.innerHTML = `У таблиці зараз заповнено <b>${filled} із ${state.rows.length}</b> рядків. Після підтвердження всі введені температури та фіксація часу старту будуть видалені з пам'яті браузера.`;
+        clearModal.classList.add('open');
+        cancelClearBtn.focus();
+      }
+
+      function closeClearModal() {
+        clearModal.classList.remove('open');
+      }
+
+      clearDataBtn.addEventListener('click', openClearModal);
+      cancelClearBtn.addEventListener('click', closeClearModal);
+
+      clearModal.addEventListener('click', (e) => {
+        if (e.target === clearModal) closeClearModal();
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && clearModal.classList.contains('open')) {
+          closeClearModal();
+        }
+      });
+
+      confirmClearBtn.addEventListener('click', () => {
+        state.startTimestampMs = null;
+        state.isRunning = false;
+        state.rows.forEach(r => {
+          r.t1 = '';
+          r.t2 = '';
+          r.t3 = '';
+        });
+        syncRowsStructure();
+        saveState();
+        renderTable();
+        recalculateAndDraw();
+        updateTimerTick();
+        closeClearModal();
+      });
+
+      window.addEventListener('resize', () => {
+        drawChart();
+      });
+
+      // INITIALIZE APP
+      loadState();
+      renderTable();
+      recalculateAndDraw();
+      startTimerLoop();
+    })();
+  </script>
+</body>
+</html>
