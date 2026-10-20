@@ -1315,13 +1315,14 @@
           const actx = getAudioContext();
           if (!actx) return;
 
-          // Pattern: н-в-н-в-н-в (6 alternating low-high notes)
+          // Pattern: н-в-н-в-н-в-н (7 alternating low-high notes ending on low)
           const LOW_FREQ = 783.99;  // G5 (н - низька нота)
           const HIGH_FREQ = 1174.66; // D6 (в - висока нота)
           const patternFreqs = [
             LOW_FREQ, HIGH_FREQ,
             LOW_FREQ, HIGH_FREQ,
-            LOW_FREQ, HIGH_FREQ
+            LOW_FREQ, HIGH_FREQ,
+            LOW_FREQ
           ];
           const noteDuration = 0.07;
           const noteStep = 0.08;
