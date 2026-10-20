@@ -60,10 +60,11 @@
       overflow: hidden;
     }
 
-    /* TOP HEADER & CONTROLS */
+    /* TOP HEADER & CONTROLS (DARK THEME) */
     .top-bar {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+      background: var(--dark);
+      color: #ffffff;
+      border: 1px solid #3a3a3a;
       border-top: 3px solid var(--primary);
       border-radius: var(--radius);
       padding: 8px 14px;
@@ -74,6 +75,8 @@
       gap: 10px;
       box-shadow: var(--shadow);
       flex-shrink: 0;
+      position: relative;
+      z-index: 200;
     }
 
     .brand-block {
@@ -98,78 +101,80 @@
     }
 
     .brand-title h1 {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
-      color: var(--dark);
+      color: #ffffff;
       line-height: 1.2;
+      white-space: nowrap;
     }
 
     .brand-subtitle {
-      font-size: 11.5px;
-      color: var(--text-muted);
+      font-size: 11px;
+      color: #bdbdbd;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      white-space: nowrap;
     }
 
     .save-badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 1px 7px;
+      gap: 3px;
+      padding: 1px 6px;
       border-radius: 99px;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 500;
-      background: rgba(62, 177, 200, 0.14);
-      color: var(--cyan-dark);
+      background: rgba(62, 177, 200, 0.2);
+      color: #6fe3f7;
     }
 
     .controls-group {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
 
     .param-field {
       display: flex;
       align-items: center;
-      gap: 5px;
-      background: var(--bg-main);
-      border: 1px solid var(--border);
-      padding: 4px 8px;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 3px 7px;
       border-radius: 7px;
     }
 
     .param-field label {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 500;
-      color: var(--dark-soft);
+      color: #ececec;
       white-space: nowrap;
     }
 
     .param-field input {
-      width: 52px;
-      border: 1px solid var(--border-strong);
+      width: 46px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
       border-radius: 5px;
-      padding: 3px 6px;
+      padding: 2px 4px;
       font-family: 'Fira Sans', sans-serif;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
       color: var(--dark);
       text-align: center;
-      background: #fff;
+      background: #ffffff;
       font-variant-numeric: tabular-nums;
     }
 
     .param-field input:focus {
-      outline: 2px solid var(--primary);
-      border-color: var(--primary);
+      outline: 2px solid var(--gold);
+      border-color: var(--gold);
     }
 
     .param-unit {
       font-size: 11.5px;
-      color: var(--text-muted);
+      color: #c2c2c2;
     }
 
     /* Timer widget */
@@ -177,7 +182,8 @@
       display: flex;
       align-items: center;
       gap: 7px;
-      background: var(--dark);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       color: #fff;
       padding: 5px 11px;
       border-radius: 7px;
@@ -212,7 +218,7 @@
     }
 
     .sound-btn {
-      background: rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.14);
       border: none;
       color: #fff;
       border-radius: 4px;
@@ -224,7 +230,167 @@
     }
 
     .sound-btn:hover {
-      background: rgba(255,255,255,0.24);
+      background: rgba(255,255,255,0.26);
+    }
+
+    /* Burger Menu in Dark Header */
+    .burger-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .burger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 7px;
+      padding: 6px 12px;
+      font-family: 'Fira Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .burger-btn:hover,
+    .burger-btn.active {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: var(--gold);
+    }
+
+    .burger-icon {
+      display: inline-flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 16px;
+      height: 12px;
+    }
+
+    .burger-icon span {
+      display: block;
+      height: 2px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 2px;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .burger-btn.active .burger-icon span:nth-child(1) {
+      transform: translateY(5px) rotate(45deg);
+    }
+
+    .burger-btn.active .burger-icon span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .burger-btn.active .burger-icon span:nth-child(3) {
+      transform: translateY(-5px) rotate(-45deg);
+    }
+
+    .burger-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 280px;
+      background: var(--bg-card);
+      color: var(--dark);
+      border: 1px solid var(--border-strong);
+      border-top: 3px solid var(--primary);
+      border-radius: 10px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+      padding: 6px;
+      display: none;
+      flex-direction: column;
+      gap: 3px;
+      z-index: 500;
+      animation: dropdownFade 0.15s ease-out;
+    }
+
+    .burger-dropdown.open {
+      display: flex;
+    }
+
+    @keyframes dropdownFade {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .burger-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 9px 11px;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      font-family: 'Fira Sans', sans-serif;
+      text-align: left;
+      text-decoration: none;
+      color: var(--dark);
+      cursor: pointer;
+      transition: background 0.14s ease;
+    }
+
+    .burger-item:hover {
+      background: #f2f4f7;
+    }
+
+    .burger-item-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .burger-item-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+
+    .burger-item-text strong {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dark);
+      line-height: 1.25;
+    }
+
+    .burger-item-text small {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.25;
+    }
+
+    .burger-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 3px 6px;
+    }
+
+    .burger-item-danger:hover {
+      background: var(--primary-soft);
+    }
+
+    .burger-item-danger .burger-item-text strong {
+      color: var(--primary);
+    }
+
+    .burger-item-danger .burger-item-icon {
+      background: var(--primary-soft);
+      border-color: rgba(160, 0, 27, 0.25);
     }
 
     /* Buttons */
@@ -314,10 +480,11 @@
     }
 
     .clock-card {
-      background: var(--dark);
-      color: #ffffff;
+      background: var(--bg-card);
+      color: var(--dark);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
-      border-left: 5px solid var(--gold);
+      border-left: 5px solid var(--primary);
       padding: 10px 16px;
       display: flex;
       align-items: center;
@@ -338,7 +505,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #dedede;
+      color: var(--dark);
       display: flex;
       align-items: center;
       gap: 6px;
@@ -355,20 +522,20 @@
 
     .clock-sub {
       font-size: 11px;
-      color: #aaaaaa;
+      color: var(--text-muted);
     }
 
     .clock-digits {
       font-size: 30px;
       font-weight: 700;
-      color: var(--gold);
+      color: var(--dark);
       letter-spacing: 1.2px;
       line-height: 1;
       font-variant-numeric: tabular-nums;
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--bg-main);
       padding: 6px 12px;
       border-radius: 7px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid var(--border-strong);
     }
 
     .panel {
@@ -976,19 +1143,51 @@
         </div>
       </div>
 
-      <div class="controls-group">
-        <a href="theory.html" target="_blank" rel="noopener" class="btn btn-cyan" title="Відкрити анімований теоретичний конспект у новій вкладці">
-          📖 Інтерактивний конспект ↗
-        </a>
-        <button class="btn btn-gold" id="demoDataBtn" title="Заповнити таблицю демонстраційними даними">
-          🧪 Тестові дані
+      <div class="burger-wrap" id="burgerWrap">
+        <button type="button" class="burger-btn" id="burgerToggleBtn" aria-expanded="false" aria-controls="burgerMenu" title="Додаткові дії: конспект, тестові дані, експорт CSV, очищення">
+          <span class="burger-icon" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+          <span>Меню</span>
         </button>
-        <button class="btn btn-outline" id="exportCsvBtn" title="Завантажити таблицю вимірювань у форматі CSV (Excel)">
-          📥 Експорт CSV
-        </button>
-        <button class="btn btn-danger-outline" id="clearDataBtn" title="Очистити всі введені вимірювання">
-          🗑️ Очистити дані
-        </button>
+
+        <div class="burger-dropdown" id="burgerMenu" role="menu">
+          <a href="theory.html" target="_blank" rel="noopener" class="burger-item" id="theoryMenuLink" role="menuitem">
+            <span class="burger-item-icon">📖</span>
+            <span class="burger-item-text">
+              <strong>Інтерактивний конспект ↗</strong>
+              <small>Теорія ІЧ-термографії та симулятор похибок</small>
+            </span>
+          </a>
+
+          <button type="button" class="burger-item" id="demoDataBtn" role="menuitem">
+            <span class="burger-item-icon">🧪</span>
+            <span class="burger-item-text">
+              <strong>Тестові дані</strong>
+              <small>Заповнити таблицю демонстраційними замірами</small>
+            </span>
+          </button>
+
+          <button type="button" class="burger-item" id="exportCsvBtn" role="menuitem">
+            <span class="burger-item-icon">📥</span>
+            <span class="burger-item-text">
+              <strong>Експорт CSV</strong>
+              <small>Завантажити таблицю вимірювань для Excel</small>
+            </span>
+          </button>
+
+          <div class="burger-divider" role="separator"></div>
+
+          <button type="button" class="burger-item burger-item-danger" id="clearDataBtn" role="menuitem">
+            <span class="burger-item-icon">🗑️</span>
+            <span class="burger-item-text">
+              <strong>Очистити дані</strong>
+              <small>Видалити всі вимірювання та скинути таймер</small>
+            </span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -1193,15 +1392,17 @@
     </main>
   </div>
 
-  <!-- PROTECTIVE CONFIRMATION MODAL FOR CLEARING DATA -->
+  <!-- PROTECTIVE CONFIRMATION MODAL FOR DATA-ALTERING ACTIONS -->
   <div class="modal-backdrop" id="clearModal" role="dialog" aria-modal="true" aria-labelledby="clearModalTitle">
     <div class="modal-box">
       <div class="modal-title" id="clearModalTitle">
         <span style="color: var(--primary); font-size: 20px;">⚠️</span>
-        <span>Підтвердження очищення даних</span>
+        <span id="modalTitleText">Підтвердження дії</span>
       </div>
       <div class="modal-body">
-        Ви дійсно бажаєте видалити всі результати поточних вимірювань та скинути таймер лабораторної роботи?
+        <div id="modalBodyText">
+          Ви дійсно бажаєте видалити всі результати поточних вимірювань та скинути таймер лабораторної роботи?
+        </div>
         <div class="modal-warning-box" id="modalStatsWarning">
           У таблиці зараз заповнено <b>0</b> рядків. Після видалення відновити ці значення буде неможливо.
         </div>
@@ -1222,6 +1423,10 @@
       const intervalInput = document.getElementById('intervalInput');
       const ambientInput = document.getElementById('ambientInput');
       const startBtn = document.getElementById('startBtn');
+      const burgerWrap = document.getElementById('burgerWrap');
+      const burgerToggleBtn = document.getElementById('burgerToggleBtn');
+      const burgerMenu = document.getElementById('burgerMenu');
+      const theoryMenuLink = document.getElementById('theoryMenuLink');
       const demoDataBtn = document.getElementById('demoDataBtn');
       const exportCsvBtn = document.getElementById('exportCsvBtn');
       const clearDataBtn = document.getElementById('clearDataBtn');
@@ -1254,6 +1459,8 @@
 
       // Modal DOM
       const clearModal = document.getElementById('clearModal');
+      const modalTitleText = document.getElementById('modalTitleText');
+      const modalBodyText = document.getElementById('modalBodyText');
       const modalStatsWarning = document.getElementById('modalStatsWarning');
       const cancelClearBtn = document.getElementById('cancelClearBtn');
       const confirmClearBtn = document.getElementById('confirmClearBtn');
@@ -2242,10 +2449,90 @@
         });
       });
 
-      // Controls Handlers
-      function handleParamsChange() {
-        state.durationMin = Math.max(1, Math.min(180, parseFloat(durationInput.value) || 20));
-        state.intervalMin = Math.max(0.25, Math.min(60, parseFloat(intervalInput.value) || 1));
+      // BURGER MENU HANDLERS
+      function closeBurgerMenu() {
+        burgerMenu.classList.remove('open');
+        burgerToggleBtn.classList.remove('active');
+        burgerToggleBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggleBurgerMenu(e) {
+        e.stopPropagation();
+        const isOpen = burgerMenu.classList.toggle('open');
+        burgerToggleBtn.classList.toggle('active', isOpen);
+        burgerToggleBtn.setAttribute('aria-expanded', String(isOpen));
+      }
+
+      burgerToggleBtn.addEventListener('click', toggleBurgerMenu);
+
+      if (theoryMenuLink) {
+        theoryMenuLink.addEventListener('click', () => {
+          closeBurgerMenu();
+        });
+      }
+
+      document.addEventListener('click', (e) => {
+        if (burgerWrap && !burgerWrap.contains(e.target)) {
+          closeBurgerMenu();
+        }
+      });
+
+      // GENERIC PROTECTIVE CONFIRMATION MODAL
+      let pendingConfirmCallback = null;
+      let pendingCancelCallback = null;
+
+      function openConfirmModal({ title, bodyText, warningHtml, confirmText, onConfirm, onCancel }) {
+        modalTitleText.textContent = title || 'Підтвердження дії';
+        modalBodyText.textContent = bodyText || '';
+        modalStatsWarning.innerHTML = warningHtml || '';
+        confirmClearBtn.textContent = confirmText || 'Підтвердити';
+        pendingConfirmCallback = typeof onConfirm === 'function' ? onConfirm : null;
+        pendingCancelCallback = typeof onCancel === 'function' ? onCancel : null;
+        clearModal.classList.add('open');
+        cancelClearBtn.focus();
+      }
+
+      function closeConfirmModal(runCancelCallback = true) {
+        clearModal.classList.remove('open');
+        if (runCancelCallback && pendingCancelCallback) {
+          const cancelFn = pendingCancelCallback;
+          pendingCancelCallback = null;
+          pendingConfirmCallback = null;
+          cancelFn();
+        } else {
+          pendingCancelCallback = null;
+          pendingConfirmCallback = null;
+        }
+      }
+
+      cancelClearBtn.addEventListener('click', () => closeConfirmModal(true));
+
+      clearModal.addEventListener('click', (e) => {
+        if (e.target === clearModal) closeConfirmModal(true);
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (clearModal.classList.contains('open')) {
+            closeConfirmModal(true);
+          } else if (burgerMenu.classList.contains('open')) {
+            closeBurgerMenu();
+          }
+        }
+      });
+
+      confirmClearBtn.addEventListener('click', () => {
+        const confirmFn = pendingConfirmCallback;
+        closeConfirmModal(false);
+        if (confirmFn) confirmFn();
+      });
+
+      // Controls Handlers with protection against accidental data loss
+      function applyTimeParams(newDur, newIntv) {
+        state.durationMin = newDur;
+        state.intervalMin = newIntv;
+        durationInput.value = newDur;
+        intervalInput.value = newIntv;
         state.ambientTemp = parseFloat(ambientInput.value);
         if (isNaN(state.ambientTemp)) state.ambientTemp = 20;
 
@@ -2253,6 +2540,57 @@
         saveState();
         renderTable();
         recalculateAndDraw();
+      }
+
+      function handleParamsChange() {
+        const newDur = Math.max(1, Math.min(180, parseFloat(durationInput.value) || 20));
+        const newIntv = Math.max(0.25, Math.min(60, parseFloat(intervalInput.value) || 1));
+        const oldDur = state.durationMin;
+        const oldIntv = state.intervalMin;
+
+        const filled = countFilledRows();
+        const isDecreasingDuration = newDur < oldDur;
+        const isIncreasingOrChangingInterval = newIntv !== oldIntv;
+
+        // Protect against data loss when decreasing duration or changing/increasing interval during active measurement or when data is present
+        if ((state.isRunning || filled > 0) && (isDecreasingDuration || isIncreasingOrChangingInterval)) {
+          const newStepsCount = Math.floor(newDur / newIntv + 1e-9);
+          const lostFilledRows = state.rows
+            .slice(newStepsCount + 1)
+            .filter(r => r.t1 !== '' || r.t2 !== '' || r.t3 !== '').length;
+
+          const reasonParts = [];
+          if (isDecreasingDuration) {
+            reasonParts.push(`зменшення часу вимірювання (${oldDur} → ${newDur} хв)`);
+          }
+          if (isIncreasingOrChangingInterval) {
+            reasonParts.push(`зміна інтервалу (${oldIntv} → ${newIntv} хв)`);
+          }
+
+          let warningDetails = `Параметри сітки: <b>${state.rows.length} → ${newStepsCount + 1}</b> рядків. У таблиці зараз заповнено <b>${filled}</b> рядків.`;
+          if (lostFilledRows > 0) {
+            warningDetails += ` <br><b style="color: var(--primary);">Увага: ${lostFilledRows} заповнених рядків виходять за межі нової сітки і будуть видалені!</b>`;
+          } else if (isIncreasingOrChangingInterval && filled > 0) {
+            warningDetails += ` <br><b style="color: var(--primary);">Увага: зміна кроку часу під час вимірювання змістить часові відмітки вже введених даних!</b>`;
+          }
+
+          openConfirmModal({
+            title: 'Ризик втрати даних при зміні параметрів',
+            bodyText: `Ви виконуєте ${reasonParts.join(' та ')} під час роботи з таблицею. Це перебудує часову шкалу вимірювань і може призвести до втрати введених даних.`,
+            warningHtml: warningDetails,
+            confirmText: 'Так, змінити параметри',
+            onConfirm: () => {
+              applyTimeParams(newDur, newIntv);
+            },
+            onCancel: () => {
+              durationInput.value = state.durationMin;
+              intervalInput.value = state.intervalMin;
+            }
+          });
+          return;
+        }
+
+        applyTimeParams(newDur, newIntv);
       }
 
       durationInput.addEventListener('change', handleParamsChange);
@@ -2297,7 +2635,7 @@
       });
 
       // Demo Data Generator (Realistic cooling curves for insulated vs uninsulated cup + thermocouple)
-      demoDataBtn.addEventListener('click', () => {
+      function loadDemoMeasurements() {
         if (!state.startTimestampMs) {
           state.startTimestampMs = Date.now();
           state.isRunning = true;
@@ -2328,10 +2666,27 @@
         saveState();
         renderTable();
         recalculateAndDraw();
+      }
+
+      demoDataBtn.addEventListener('click', () => {
+        closeBurgerMenu();
+        const filled = countFilledRows();
+        if (state.isRunning || filled > 0) {
+          openConfirmModal({
+            title: 'Заміна даних на тестові',
+            bodyText: 'Завантаження демонстраційних даних під час активного вимірювання або за наявності введених значень перезапише поточні результати в таблиці.',
+            warningHtml: `У таблиці зараз заповнено <b>${filled} із ${state.rows.length}</b> рядків${state.isRunning ? ' (триває активне вимірювання)' : ''}. Поточні введені температури будуть замінені на тестові.`,
+            confirmText: 'Так, завантажити тестові дані',
+            onConfirm: loadDemoMeasurements
+          });
+          return;
+        }
+        loadDemoMeasurements();
       });
 
       // Export CSV
       exportCsvBtn.addEventListener('click', () => {
+        closeBurgerMenu();
         const lines = [];
         lines.push([
           '№',
@@ -2380,44 +2735,29 @@
       });
 
       // PROTECTIVE CLEAR MODAL HANDLERS
-      function openClearModal() {
+      clearDataBtn.addEventListener('click', () => {
+        closeBurgerMenu();
         const filled = countFilledRows();
-        modalStatsWarning.innerHTML = `У таблиці зараз заповнено <b>${filled} із ${state.rows.length}</b> рядків. Після підтвердження всі введені температури та фіксація часу старту будуть видалені з пам'яті браузера.`;
-        clearModal.classList.add('open');
-        cancelClearBtn.focus();
-      }
-
-      function closeClearModal() {
-        clearModal.classList.remove('open');
-      }
-
-      clearDataBtn.addEventListener('click', openClearModal);
-      cancelClearBtn.addEventListener('click', closeClearModal);
-
-      clearModal.addEventListener('click', (e) => {
-        if (e.target === clearModal) closeClearModal();
-      });
-
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && clearModal.classList.contains('open')) {
-          closeClearModal();
-        }
-      });
-
-      confirmClearBtn.addEventListener('click', () => {
-        state.startTimestampMs = null;
-        state.isRunning = false;
-        state.rows.forEach(r => {
-          r.t1 = '';
-          r.t2 = '';
-          r.t3 = '';
+        openConfirmModal({
+          title: 'Підтвердження очищення даних',
+          bodyText: 'Ви дійсно бажаєте видалити всі результати поточних вимірювань та скинути таймер лабораторної роботи?',
+          warningHtml: `У таблиці зараз заповнено <b>${filled} із ${state.rows.length}</b> рядків. Після підтвердження всі введені температури та фіксація часу старту будуть видалені з пам'яті браузера.`,
+          confirmText: 'Так, очистити таблицю',
+          onConfirm: () => {
+            state.startTimestampMs = null;
+            state.isRunning = false;
+            state.rows.forEach(r => {
+              r.t1 = '';
+              r.t2 = '';
+              r.t3 = '';
+            });
+            syncRowsStructure();
+            saveState();
+            renderTable();
+            recalculateAndDraw();
+            updateTimerTick();
+          }
         });
-        syncRowsStructure();
-        saveState();
-        renderTable();
-        recalculateAndDraw();
-        updateTimerTick();
-        closeClearModal();
       });
 
       window.addEventListener('resize', () => {
