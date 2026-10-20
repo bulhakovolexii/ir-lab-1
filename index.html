@@ -294,7 +294,7 @@
     /* MAIN WORKSPACE (LEFT TABLE + RIGHT CHART/STATS) */
     .workspace {
       display: grid;
-      grid-template-columns: minmax(430px, 43%) 1fr;
+      grid-template-columns: minmax(390px, 40%) 1fr;
       gap: 12px;
       flex: 1;
       min-height: 0; /* critical so grid children don't overflow 100vh */
@@ -632,7 +632,7 @@
     /* ANALYTICS CARDS */
     .analytics-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
       flex-shrink: 0;
     }
@@ -641,14 +641,15 @@
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 9px 12px;
+      padding: 8px 11px 8px 13px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 5px;
+      gap: 4px;
       position: relative;
       overflow: hidden;
+      min-width: 0;
     }
 
     .stat-card::before {
@@ -665,14 +666,29 @@
     .stat-card.card-primary::before { background: var(--primary); }
 
     .stat-header {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
       color: var(--text-muted);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stat-header-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: #f2f2f2;
+      color: var(--dark-soft);
+      text-transform: none;
+      flex-shrink: 0;
     }
 
     .stat-main-row {
@@ -684,9 +700,10 @@
     }
 
     .stat-big-value {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--dark);
+      line-height: 1.15;
     }
 
     .stat-big-value.highlight-primary {
@@ -698,7 +715,7 @@
     }
 
     .stat-sub-rows {
-      font-size: 11.5px;
+      font-size: 11px;
       color: var(--dark-soft);
       display: flex;
       flex-direction: column;
@@ -709,19 +726,42 @@
     .stat-row-item {
       display: flex;
       justify-content: space-between;
+      align-items: baseline;
       gap: 6px;
+      white-space: nowrap;
+    }
+
+    .trend-item-row {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding: 2px 0;
+      border-bottom: 1px dashed #eeeeee;
+    }
+    .trend-item-row:last-child {
+      border-bottom: none;
+    }
+
+    .trend-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+      font-size: 10.5px;
+      white-space: nowrap;
     }
 
     .formula-tag {
-      font-size: 11px;
+      font-size: 10.5px;
       background: #f4f4f4;
-      padding: 2px 6px;
+      padding: 1px 6px;
       border-radius: 4px;
       color: var(--dark);
-      font-weight: 500;
+      font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-variant-numeric: tabular-nums;
     }
 
     /* MODAL POPUP FOR DATA CLEARING */
@@ -855,6 +895,7 @@
           <span>Наступний замір:</span>
           <span class="timer-countdown" id="timerCountdown">--:--</span>
           <button class="sound-btn" id="soundToggleBtn" title="Увімкнути/вимкнути звуковий сигнал таймера">🔔 Звук</button>
+          <button class="sound-btn" id="testAlarmBtn" title="Перевірити гучність будильника">🔊 Тест</button>
         </div>
       </div>
 
@@ -966,16 +1007,16 @@
           <!-- CARD 1: INTEGRAL AREA & INSULATION EFFECT -->
           <div class="stat-card card-gold">
             <div class="stat-header">
-              <span>Площа під графіком (Тепловізор)</span>
-              <span title="Інтеграл надлишкової температури ∫(T(t) - T_навк)dt за методом трапецій">∫(T − T<sub>навк</sub>)dt</span>
+              <span>Площа під графіком (ІЧ)</span>
+              <span class="stat-header-badge" title="Інтеграл надлишкової температури ∫(T(t) - T_навк)dt за методом трапецій">∫(T − T<sub>навк</sub>)dt</span>
             </div>
             <div class="stat-main-row">
               <div>
-                <div style="font-size: 11px; color: var(--text-muted);">Різниця площ / Ефект утеплення:</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Різниця площ S₁ vs S₂:</div>
                 <div class="stat-big-value highlight-primary" id="areaSavingsPercent">— %</div>
               </div>
               <div style="text-align: right;">
-                <div style="font-size: 11px; color: var(--text-muted);">Скорочення ΔT охолодж.:</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Економія ΔT охолодж.:</div>
                 <div style="font-size: 15px; font-weight: 700; color: var(--dark);" id="tempDropSaving">— %</div>
               </div>
             </div>
@@ -988,8 +1029,8 @@
                 <span><b style="color: var(--cyan-dark);">■</b> S₂ (Неутеплена, над T<sub>навк</sub>):</span>
                 <strong id="areaT2Val">— °C·хв</strong>
               </div>
-              <div class="stat-row-item" style="color: var(--text-muted); font-size: 11px;">
-                <span>Повна площа ∫T(t)dt (S₁ / S₂):</span>
+              <div class="stat-row-item" style="color: var(--text-muted); font-size: 10.5px;">
+                <span>Повна ∫T(t)dt (S₁ / S₂):</span>
                 <span id="rawAreaVal">— / —</span>
               </div>
             </div>
@@ -998,28 +1039,28 @@
           <!-- CARD 2: NEWTON'S LAW OF COOLING TRENDS -->
           <div class="stat-card card-cyan">
             <div class="stat-header">
-              <span>Експоненційні лінії тренду</span>
-              <span>Закон Ньютона</span>
+              <span>Тренди охолодження</span>
+              <span class="stat-header-badge">Закон Ньютона</span>
             </div>
-            <div class="stat-sub-rows" style="gap: 4px; margin-top: 2px;">
-              <div>
-                <div style="display:flex; justify-content:space-between; font-size:11px;">
-                  <span><b style="color: var(--gold-dark);">T₁ Утеплена:</b></span>
-                  <span id="r2T1">R² = —</span>
+            <div class="stat-sub-rows" style="gap: 2px;">
+              <div class="trend-item-row">
+                <div class="trend-item-top">
+                  <span><b style="color: var(--gold-dark);">● T₁ Утепл.:</b></span>
+                  <span id="r2T1" style="color: var(--text-muted);">R² = —</span>
                 </div>
                 <div class="formula-tag" id="eqT1">Недостатньо точок (мін. 2)</div>
               </div>
-              <div>
-                <div style="display:flex; justify-content:space-between; font-size:11px;">
-                  <span><b style="color: var(--cyan-dark);">T₂ Неутеплена (ІЧ):</b></span>
-                  <span id="r2T2">R² = —</span>
+              <div class="trend-item-row">
+                <div class="trend-item-top">
+                  <span><b style="color: var(--cyan-dark);">● T₂ Неутепл.:</b></span>
+                  <span id="r2T2" style="color: var(--text-muted);">R² = —</span>
                 </div>
                 <div class="formula-tag" id="eqT2">Недостатньо точок (мін. 2)</div>
               </div>
-              <div>
-                <div style="display:flex; justify-content:space-between; font-size:11px;">
-                  <span><b style="color: var(--primary);">T₃ Термопара:</b></span>
-                  <span id="r2T3">R² = —</span>
+              <div class="trend-item-row">
+                <div class="trend-item-top">
+                  <span><b style="color: var(--primary);">● T₃ Термоп.:</b></span>
+                  <span id="r2T3" style="color: var(--text-muted);">R² = —</span>
                 </div>
                 <div class="formula-tag" id="eqT3">Недостатньо точок (мін. 2)</div>
               </div>
@@ -1029,29 +1070,29 @@
           <!-- CARD 3: CONTACTLESS MEASUREMENT ACCURACY -->
           <div class="stat-card card-primary">
             <div class="stat-header">
-              <span>Порівняння з референсом (T₃ vs T₂)</span>
-              <span>Неутеплена чашка</span>
+              <span>Точність ІЧ (T₃ vs T₂)</span>
+              <span class="stat-header-badge">Неутеплена</span>
             </div>
             <div class="stat-main-row">
               <div>
-                <div style="font-size: 11px; color: var(--text-muted);">Сер. абсолютна похибка |ΔT|:</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Сер. абс. похибка |ΔT|:</div>
                 <div class="stat-big-value highlight-cyan" id="maeVal">— °C</div>
               </div>
               <div style="text-align: right;">
-                <div style="font-size: 11px; color: var(--text-muted);">Відносна похибка δ:</div>
-                <div style="font-size: 16px; font-weight: 700; color: var(--primary);" id="mapeVal">— %</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Відносна похибка δ:</div>
+                <div style="font-size: 15.5px; font-weight: 700; color: var(--primary);" id="mapeVal">— %</div>
               </div>
             </div>
             <div class="stat-sub-rows">
               <div class="stat-row-item">
-                <span>Втрата температури ΔT₁ (Утепл.):</span>
+                <span>ΔT₁ (Утеплена):</span>
                 <strong id="dropT1Val">— °C</strong>
               </div>
               <div class="stat-row-item">
-                <span>Втрата температури ΔT₂ (Неутепл.):</span>
+                <span>ΔT₂ (Неутеплена):</span>
                 <strong id="dropT2Val">— °C</strong>
               </div>
-              <div class="stat-row-item" style="font-size: 11px; color: var(--text-muted);">
+              <div class="stat-row-item" style="font-size: 10.5px; color: var(--text-muted);">
                 <span>Оцінка ε поверхні (за T₂/T₃):</span>
                 <strong id="emissivityEstVal" style="color: var(--dark);">—</strong>
               </div>
@@ -1101,6 +1142,7 @@
       const timerWidget = document.getElementById('timerWidget');
       const timerCountdown = document.getElementById('timerCountdown');
       const soundToggleBtn = document.getElementById('soundToggleBtn');
+      const testAlarmBtn = document.getElementById('testAlarmBtn');
 
       // Analytics DOM
       const areaSavingsPercent = document.getElementById('areaSavingsPercent');
@@ -1236,24 +1278,76 @@
         }
       }
 
-      // Web Audio beep for interval notification
-      function playNotificationBeep() {
-        if (!state.soundEnabled) return;
+      // Shared AudioContext for loud alarm clock signal (3 beeps + pause + 3 beeps)
+      let sharedAudioCtx = null;
+
+      function getAudioContext() {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        if (!sharedAudioCtx) {
+          sharedAudioCtx = new AudioCtx();
+        }
+        if (sharedAudioCtx.state === 'suspended') {
+          sharedAudioCtx.resume();
+        }
+        return sharedAudioCtx;
+      }
+
+      function playNotificationBeep(forcePlay = false) {
+        if (!state.soundEnabled && !forcePlay) return;
         try {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (!AudioCtx) return;
-          const actx = new AudioCtx();
-          const osc = actx.createOscillator();
-          const gain = actx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, actx.currentTime);
-          osc.frequency.setValueAtTime(1174.66, actx.currentTime + 0.12);
-          gain.gain.setValueAtTime(0.12, actx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.35);
-          osc.connect(gain);
-          gain.connect(actx.destination);
-          osc.start();
-          osc.stop(actx.currentTime + 0.36);
+          const actx = getAudioContext();
+          if (!actx) return;
+
+          // Digital alarm pattern: 3 beeps, pause, 3 beeps
+          const beepOffsets = [
+            0.00, 0.17, 0.34,
+            0.82, 0.99, 1.16
+          ];
+          const beepDuration = 0.11;
+
+          // Compressor to make the alarm loud, punchy and distortion-free
+          const compressor = actx.createDynamicsCompressor();
+          compressor.threshold.setValueAtTime(-14, actx.currentTime);
+          compressor.knee.setValueAtTime(10, actx.currentTime);
+          compressor.ratio.setValueAtTime(6, actx.currentTime);
+          compressor.attack.setValueAtTime(0.002, actx.currentTime);
+          compressor.release.setValueAtTime(0.08, actx.currentTime);
+          compressor.connect(actx.destination);
+
+          beepOffsets.forEach((offset, idx) => {
+            const startTime = actx.currentTime + offset;
+            const stopTime = startTime + beepDuration;
+
+            const osc1 = actx.createOscillator();
+            const osc2 = actx.createOscillator();
+            const gain = actx.createGain();
+
+            // Crisp alarm frequencies (C6 + G6 / C7)
+            osc1.type = 'triangle';
+            osc2.type = 'square';
+            const baseFreq = idx >= 3 ? 1174.66 : 1046.50; // Second burst slightly higher pitch
+            osc1.frequency.setValueAtTime(baseFreq, startTime);
+            osc2.frequency.setValueAtTime(baseFreq * 2, startTime);
+
+            gain.gain.setValueAtTime(0.001, startTime);
+            gain.gain.linearRampToValueAtTime(0.65, startTime + 0.01);
+            gain.gain.setValueAtTime(0.65, stopTime - 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, stopTime);
+
+            const osc2Gain = actx.createGain();
+            osc2Gain.gain.setValueAtTime(0.28, startTime);
+
+            osc1.connect(gain);
+            osc2.connect(osc2Gain);
+            osc2Gain.connect(gain);
+            gain.connect(compressor);
+
+            osc1.start(startTime);
+            osc2.start(startTime);
+            osc1.stop(stopTime + 0.01);
+            osc2.stop(stopTime + 0.01);
+          });
         } catch (_) {}
       }
 
@@ -1386,13 +1480,21 @@
         let nextRow = rIdx;
         let nextCol = cIdx;
 
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' || e.key === 'ArrowRight') {
           e.preventDefault();
           if (cIdx < 2) {
             nextCol = cIdx + 1;
-          } else {
+          } else if (rIdx < state.rows.length - 1) {
             nextCol = 0;
-            nextRow = Math.min(state.rows.length - 1, rIdx + 1);
+            nextRow = rIdx + 1;
+          }
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          if (cIdx > 0) {
+            nextCol = cIdx - 1;
+          } else if (rIdx > 0) {
+            nextCol = 2;
+            nextRow = rIdx - 1;
           }
         } else if (e.key === 'ArrowDown') {
           e.preventDefault();
@@ -1410,6 +1512,7 @@
         if (nextInput) {
           nextInput.focus();
           nextInput.select();
+          nextInput.scrollIntoView({ block: 'nearest' });
         }
       });
 
@@ -1602,7 +1705,7 @@
         // Update Trend Cards
         if (fit1) {
           eqT1.textContent = fit1.formulaStr;
-          r2T1.textContent = `R² = ${fit1.r2.toFixed(3)} | k = ${fit1.k.toFixed(4)} хв⁻¹`;
+          r2T1.textContent = `R²=${fit1.r2.toFixed(3)} | k=${fit1.k.toFixed(4)}`;
         } else {
           eqT1.textContent = 'Недостатньо точок (мін. 2)';
           r2T1.textContent = 'R² = —';
@@ -1610,7 +1713,7 @@
 
         if (fit2) {
           eqT2.textContent = fit2.formulaStr;
-          r2T2.textContent = `R² = ${fit2.r2.toFixed(3)} | k = ${fit2.k.toFixed(4)} хв⁻¹`;
+          r2T2.textContent = `R²=${fit2.r2.toFixed(3)} | k=${fit2.k.toFixed(4)}`;
         } else {
           eqT2.textContent = 'Недостатньо точок (мін. 2)';
           r2T2.textContent = 'R² = —';
@@ -1618,7 +1721,7 @@
 
         if (fit3) {
           eqT3.textContent = fit3.formulaStr;
-          r2T3.textContent = `R² = ${fit3.r2.toFixed(3)} | k = ${fit3.k.toFixed(4)} хв⁻¹`;
+          r2T3.textContent = `R²=${fit3.r2.toFixed(3)} | k=${fit3.k.toFixed(4)}`;
         } else {
           eqT3.textContent = 'Недостатньо точок (мін. 2)';
           r2T3.textContent = 'R² = —';
@@ -1789,7 +1892,9 @@
             ctx.lineTo(px, padTop + plotH);
             ctx.stroke();
 
-            const shortTime = r.timeLabel.length > 5 ? r.timeLabel.slice(0, 5) : r.timeLabel;
+            const shortTime = r.timeLabel.startsWith('+')
+              ? r.timeLabel
+              : r.timeLabel.slice(0, 5);
             ctx.fillStyle = '#444';
             ctx.fillText(`${r.elapsedMin} хв`, px, padTop + plotH + 6);
             ctx.fillStyle = '#888';
@@ -2050,6 +2155,7 @@
 
       // "Почати вимірювання" Button
       startBtn.addEventListener('click', () => {
+        getAudioContext(); // Unlock audio context on user interaction
         state.durationMin = Math.max(1, Math.min(180, parseFloat(durationInput.value) || 20));
         state.intervalMin = Math.max(0.25, Math.min(60, parseFloat(intervalInput.value) || 1));
         state.startTimestampMs = Date.now();
@@ -2067,12 +2173,21 @@
         if (firstInput) firstInput.focus();
       });
 
-      // Sound toggle
+      // Sound toggle & test alarm button
       soundToggleBtn.addEventListener('click', () => {
         state.soundEnabled = !state.soundEnabled;
+        if (state.soundEnabled) {
+          getAudioContext();
+        }
         saveState();
         updateHeaderStatusAndCounts();
       });
+
+      if (testAlarmBtn) {
+        testAlarmBtn.addEventListener('click', () => {
+          playNotificationBeep(true);
+        });
+      }
 
       // Demo Data Generator (Realistic cooling curves for insulated vs uninsulated cup + thermocouple)
       demoDataBtn.addEventListener('click', () => {

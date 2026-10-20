@@ -555,7 +555,7 @@
             </div>
           </div>
 
-          <svg id="cupsSvg" viewBox="0 0 680 340" width="100%" height="auto" style="background:#fff; border-radius:8px; border:1px solid #ececec;">
+          <svg id="cupsSvg" viewBox="0 0 740 375" width="100%" height="auto" style="background:#fff; border-radius:8px; border:1px solid #ececec;">
             <defs>
               <linearGradient id="hotWaterGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#a0001b" stop-opacity="0.9" />
@@ -568,92 +568,93 @@
             </defs>
 
             <!-- Desk surface -->
-            <rect x="20" y="275" width="640" height="22" rx="4" fill="url(#tableGrad)" />
-            <text x="340" y="314" text-anchor="middle" fill="#686868" font-size="11.5" font-weight="600">
+            <rect x="20" y="290" width="700" height="20" rx="4" fill="url(#tableGrad)" />
+            <text x="370" y="358" text-anchor="middle" fill="#686868" font-size="11.5" font-weight="600">
               Холодна поверхня столу (поглинає тепло при прямому контакті)
             </text>
 
             <!-- LEFT CUP: UNINSULATED -->
-            <g id="svgUninsulatedCup" transform="translate(65, 0)">
-              <text x="110" y="28" text-anchor="middle" fill="#a0001b" font-size="13.5" font-weight="700">
+            <g id="svgUninsulatedCup" transform="translate(80, 0)">
+              <text x="120" y="26" text-anchor="middle" fill="#a0001b" font-size="13.5" font-weight="700">
                 НЕУТЕПЛЕНА ЧАШКА
               </text>
-              <text x="110" y="45" text-anchor="middle" fill="#686868" font-size="11">
+              <text x="120" y="43" text-anchor="middle" fill="#686868" font-size="11">
                 Відкрита поверхня + прямий контакт зі столом
               </text>
 
               <!-- Rising Steam & Intense Evaporation (55% loss) -->
               <g class="steam-group">
-                <path class="steam-path" d="M 75 115 Q 65 95 80 78 T 72 45" fill="none" stroke="#a0001b" stroke-width="3" stroke-linecap="round" />
-                <path class="steam-path d2" d="M 110 112 Q 122 92 106 74 T 115 42" fill="none" stroke="#a0001b" stroke-width="3.5" stroke-linecap="round" />
-                <path class="steam-path d3" d="M 142 115 Q 130 95 145 78 T 138 46" fill="none" stroke="#a0001b" stroke-width="3" stroke-linecap="round" />
-                <text x="110" y="72" text-anchor="middle" fill="#a0001b" font-size="11" font-weight="700">
+                <text x="120" y="62" text-anchor="middle" fill="#a0001b" font-size="11" font-weight="700">
                   Випаровування + конвекція (~55%)
                 </text>
+                <path class="steam-path" d="M 90 132 Q 82 115 94 100 T 88 82" fill="none" stroke="#a0001b" stroke-width="3" stroke-linecap="round" />
+                <path class="steam-path d2" d="M 120 130 Q 130 113 116 98 T 124 80" fill="none" stroke="#a0001b" stroke-width="3.5" stroke-linecap="round" />
+                <path class="steam-path d3" d="M 148 132 Q 138 115 150 100 T 144 82" fill="none" stroke="#a0001b" stroke-width="3" stroke-linecap="round" />
               </g>
 
               <!-- Cup Body -->
-              <path d="M 55 120 L 65 274 L 155 274 L 165 120 Z" fill="#ffffff" stroke="#2a2a2a" stroke-width="3" />
+              <path d="M 65 135 L 75 289 L 165 289 L 175 135 Z" fill="#ffffff" stroke="#2a2a2a" stroke-width="3" />
               <!-- Cup Handle -->
-              <path d="M 162 145 C 195 145, 195 225, 158 225" fill="none" stroke="#2a2a2a" stroke-width="5" />
+              <path d="M 172 160 C 205 160, 205 240, 168 240" fill="none" stroke="#2a2a2a" stroke-width="5" />
               <!-- Hot Water Inside -->
-              <path d="M 59 138 L 67 271 L 153 271 L 161 138 Z" fill="url(#hotWaterGrad)" />
+              <path d="M 69 152 L 77 286 L 163 286 L 171 152 Z" fill="url(#hotWaterGrad)" />
 
-              <!-- Thermocouple immersed in water -->
-              <path d="M 35 88 L 95 88 L 95 215" fill="none" stroke="#2a2a2a" stroke-width="2.5" stroke-dasharray="3 2" />
-              <circle cx="95" cy="215" r="4.5" fill="#a0001b" stroke="#fff" stroke-width="1.5" />
-              <rect x="8" y="74" width="68" height="20" rx="4" fill="#2a2a2a" />
-              <text x="42" y="88" text-anchor="middle" fill="#fbba00" font-size="10" font-weight="700">Термопара T₃</text>
+              <!-- Thermocouple entering cleanly from the right side -->
+              <path d="M 205 112 L 142 112 L 142 225" fill="none" stroke="#2a2a2a" stroke-width="2.5" stroke-dasharray="3 2" />
+              <circle cx="142" cy="225" r="4.5" fill="#a0001b" stroke="#fff" stroke-width="1.5" />
+              <rect x="176" y="96" width="76" height="20" rx="4" fill="#2a2a2a" />
+              <text x="214" y="110" text-anchor="middle" fill="#fbba00" font-size="10" font-weight="700">Термопара T₃</text>
 
-              <!-- Side Radiation Waves -->
-              <path class="rad-wave-l" d="M 42 165 Q 34 190 42 215" fill="none" stroke="#3eb1c8" stroke-width="2.5" stroke-linecap="round" />
-              <path class="rad-wave-l" d="M 32 155 Q 22 190 32 225" fill="none" stroke="#3eb1c8" stroke-width="2" stroke-linecap="round" />
-              <text x="18" y="250" text-anchor="middle" fill="#21899e" font-size="10.5" font-weight="600">ІЧ + конвекція (~30%)</text>
+              <!-- Side Radiation Waves (cleanly separated on the left) -->
+              <path class="rad-wave-l" d="M 52 175 Q 44 200 52 225" fill="none" stroke="#3eb1c8" stroke-width="2.5" stroke-linecap="round" />
+              <path class="rad-wave-l" d="M 42 165 Q 32 200 42 235" fill="none" stroke="#3eb1c8" stroke-width="2" stroke-linecap="round" />
+              <text x="15" y="255" text-anchor="middle" fill="#21899e" font-size="10.5" font-weight="700">ІЧ + конвекція</text>
+              <text x="15" y="269" text-anchor="middle" fill="#21899e" font-size="10.5" font-weight="700">(~30% втрат)</text>
 
               <!-- Bottom Conduction Arrows into Desk -->
-              <line class="flow-dashed" x1="85" y1="268" x2="85" y2="296" stroke="#a0001b" stroke-width="3" />
-              <line class="flow-dashed" x1="110" y1="268" x2="110" y2="296" stroke="#a0001b" stroke-width="3" />
-              <line class="flow-dashed" x1="135" y1="268" x2="135" y2="296" stroke="#a0001b" stroke-width="3" />
-              <text x="110" y="332" text-anchor="middle" fill="#a0001b" font-size="10.5" font-weight="700">
+              <line class="flow-dashed" x1="95" y1="283" x2="95" y2="310" stroke="#a0001b" stroke-width="3" />
+              <line class="flow-dashed" x1="120" y1="283" x2="120" y2="310" stroke="#a0001b" stroke-width="3" />
+              <line class="flow-dashed" x1="145" y1="283" x2="145" y2="310" stroke="#a0001b" stroke-width="3" />
+              <text x="120" y="332" text-anchor="middle" fill="#a0001b" font-size="11" font-weight="700">
                 Теплопровідність у стіл (~15%)
               </text>
             </g>
 
             <!-- RIGHT CUP: INSULATED (SAUCER + CARDBOARD COASTER) -->
-            <g id="svgInsulatedCup" transform="translate(385, 0)">
-              <text x="115" y="28" text-anchor="middle" fill="#21899e" font-size="13.5" font-weight="700">
+            <g id="svgInsulatedCup" transform="translate(425, 0)">
+              <text x="120" y="26" text-anchor="middle" fill="#21899e" font-size="13.5" font-weight="700">
                 УТЕПЛЕНА ЧАШКА
               </text>
-              <text x="115" y="45" text-anchor="middle" fill="#686868" font-size="11">
+              <text x="120" y="43" text-anchor="middle" fill="#686868" font-size="11">
                 Накрита блюдцем + картонна підставка знизу
               </text>
 
               <!-- Saucer on top blocking steam -->
-              <ellipse cx="115" cy="116" rx="70" ry="8" fill="#ffffff" stroke="#2a2a2a" stroke-width="3" />
-              <rect x="92" y="103" width="46" height="8" rx="3" fill="#fbba00" stroke="#2a2a2a" stroke-width="1.5" />
-              <text x="115" y="88" text-anchor="middle" fill="#2a2a2a" font-size="11" font-weight="700">
+              <text x="120" y="96" text-anchor="middle" fill="#2a2a2a" font-size="11" font-weight="700">
                 🛡️ Блюдце блокує пару (-85% втрат зверху)
               </text>
+              <rect x="97" y="116" width="46" height="8" rx="3" fill="#fbba00" stroke="#2a2a2a" stroke-width="1.5" />
+              <ellipse cx="120" cy="130" rx="70" ry="8" fill="#ffffff" stroke="#2a2a2a" stroke-width="3" />
 
               <!-- Cup Body -->
-              <path d="M 60 120 L 70 258 L 160 258 L 170 120 Z" fill="#ffffff" stroke="#2a2a2a" stroke-width="3" />
+              <path d="M 65 135 L 75 273 L 165 273 L 175 135 Z" fill="#ffffff" stroke="#2a2a2a" stroke-width="3" />
               <!-- Cup Handle -->
-              <path d="M 167 145 C 200 145, 200 220, 163 220" fill="none" stroke="#2a2a2a" stroke-width="5" />
+              <path d="M 172 160 C 205 160, 205 235, 168 235" fill="none" stroke="#2a2a2a" stroke-width="5" />
               <!-- Hot Water Inside -->
-              <path d="M 64 142 L 72 255 L 158 255 L 166 142 Z" fill="url(#hotWaterGrad)" />
+              <path d="M 69 156 L 77 270 L 163 270 L 171 156 Z" fill="url(#hotWaterGrad)" />
 
               <!-- Trapped air cushion under saucer -->
-              <path d="M 82 134 C 95 124, 135 124, 148 134" fill="none" stroke="#fbba00" stroke-width="2" stroke-dasharray="4 3" />
+              <path d="M 86 147 C 100 139, 140 139, 154 147" fill="none" stroke="#fbba00" stroke-width="2" stroke-dasharray="4 3" />
 
               <!-- Cardboard Coaster under bottom -->
-              <rect x="52" y="259" width="126" height="15" rx="3" fill="#d9a05b" stroke="#2a2a2a" stroke-width="2" />
-              <line x1="56" y1="266" x2="174" y2="266" stroke="#fff" stroke-width="1.5" stroke-dasharray="4 4" />
-              <text x="115" y="332" text-anchor="middle" fill="#c49000" font-size="10.5" font-weight="700">
+              <rect x="57" y="274" width="126" height="15" rx="3" fill="#d9a05b" stroke="#2a2a2a" stroke-width="2" />
+              <line x1="61" y1="281" x2="179" y2="281" stroke="#fff" stroke-width="1.5" stroke-dasharray="4 4" />
+              <text x="120" y="332" text-anchor="middle" fill="#c49000" font-size="11" font-weight="700">
                 📦 Пористий картон (λ ≈ 0.07 Вт/(м·К)) ізолює дно
               </text>
 
               <!-- Side mild radiation -->
-              <path class="rad-wave-l" d="M 48 175 Q 41 195 48 215" fill="none" stroke="#fbba00" stroke-width="2" stroke-linecap="round" />
+              <path class="rad-wave-l" d="M 52 185 Q 45 205 52 225" fill="none" stroke="#fbba00" stroke-width="2" stroke-linecap="round" />
             </g>
           </svg>
 
@@ -735,58 +736,58 @@
         <!-- Animated Diagram of Wall Gradient + Emissivity Reflection -->
         <div class="anim-stage">
           <strong style="font-size: 13.5px;">Анімована схема формування інфрачервоного сигналу на стінці чашки:</strong>
-          <svg viewBox="0 0 650 310" width="100%" height="auto" style="background:#fff; border-radius:8px; border:1px solid #ececec;">
+          <svg viewBox="0 0 720 340" width="100%" height="auto" style="background:#fff; border-radius:8px; border:1px solid #ececec;">
             <!-- Hot Water Zone (Left) -->
-            <rect x="20" y="30" width="145" height="250" rx="6" fill="rgba(160, 0, 27, 0.12)" stroke="#a0001b" stroke-width="1.5" />
-            <text x="92" y="55" text-anchor="middle" fill="#a0001b" font-size="13" font-weight="700">ГАРЯЧА ВОДА</text>
-            <text x="92" y="75" text-anchor="middle" fill="#2a2a2a" font-size="12" font-weight="600" id="svgWaterTempText">T₃ = 90.0 °C</text>
+            <rect x="18" y="24" width="164" height="280" rx="6" fill="rgba(160, 0, 27, 0.12)" stroke="#a0001b" stroke-width="1.5" />
+            <text x="100" y="48" text-anchor="middle" fill="#a0001b" font-size="13" font-weight="700">ГАРЯЧА ВОДА</text>
+            <text x="100" y="68" text-anchor="middle" fill="#2a2a2a" font-size="12.5" font-weight="700" id="svgWaterTempText">T₃ = 90.0 °C</text>
 
-            <!-- Thermocouple sensor inside water -->
-            <line x1="85" y1="30" x2="85" y2="165" stroke="#2a2a2a" stroke-width="3.5" />
-            <circle cx="85" cy="165" r="7" fill="#a0001b" stroke="#fff" stroke-width="2" />
-            <text x="85" y="192" text-anchor="middle" fill="#a0001b" font-size="11.5" font-weight="700">Зонд термопари</text>
-            <text x="85" y="207" text-anchor="middle" fill="#686868" font-size="10.5">(прямий контакт із водою)</text>
+            <!-- Thermocouple sensor inside water (starts below text so wire never crosses labels) -->
+            <path d="M 18 92 L 100 92 L 100 182" fill="none" stroke="#2a2a2a" stroke-width="3" stroke-dasharray="4 2" />
+            <circle cx="100" cy="182" r="7" fill="#a0001b" stroke="#fff" stroke-width="2" />
+            <text x="100" y="212" text-anchor="middle" fill="#a0001b" font-size="11.5" font-weight="700">Зонд термопари</text>
+            <text x="100" y="228" text-anchor="middle" fill="#686868" font-size="10.5">(прямий контакт із водою)</text>
 
             <!-- Ceramic Cup Wall (Middle) -->
-            <rect x="165" y="30" width="95" height="250" fill="#f3efe6" stroke="#2a2a2a" stroke-width="2.5" />
-            <text x="212" y="55" text-anchor="middle" fill="#2a2a2a" font-size="12.5" font-weight="700">СТІНКА ЧАШКИ</text>
-            <text x="212" y="72" text-anchor="middle" fill="#686868" font-size="10.5">Термічний опір δ/λ</text>
+            <rect x="182" y="24" width="114" height="280" fill="#f3efe6" stroke="#2a2a2a" stroke-width="2.5" />
+            <text x="239" y="48" text-anchor="middle" fill="#2a2a2a" font-size="12.5" font-weight="700">СТІНКА ЧАШКИ</text>
+            <text x="239" y="66" text-anchor="middle" fill="#686868" font-size="10.5">Термічний опір δ/λ</text>
 
             <!-- Temperature gradient line inside wall -->
-            <path d="M 165 125 L 260 165" stroke="#fbba00" stroke-width="4" />
-            <circle cx="165" cy="125" r="4" fill="#a0001b" />
-            <circle cx="260" cy="165" r="5" fill="#fbba00" stroke="#2a2a2a" stroke-width="1.5" />
-            <text x="212" y="195" text-anchor="middle" fill="#c49000" font-size="11" font-weight="700" id="svgWallDropText">
-              Перепад ΔT_ст = −2.5 °C
+            <path d="M 182 130 L 296 172" stroke="#fbba00" stroke-width="4" />
+            <circle cx="182" cy="130" r="4.5" fill="#a0001b" />
+            <circle cx="296" cy="172" r="5.5" fill="#fbba00" stroke="#2a2a2a" stroke-width="1.5" />
+            <text x="239" y="240" text-anchor="middle" fill="#c49000" font-size="11" font-weight="700" id="svgWallDropText">
+              ΔT_ст = −2.5 °C
             </text>
-            <text x="262" y="255" text-anchor="start" fill="#2a2a2a" font-size="11.5" font-weight="700" id="svgSurfaceTempText">
-              Зовн. поверхня: 87.5 °C
+            <text x="239" y="275" text-anchor="middle" fill="#2a2a2a" font-size="10.5" font-weight="700" id="svgSurfaceTempText">
+              Зовн. стінка: 87.5 °C
             </text>
 
-            <!-- Ambient Room Source (Top Right) -->
-            <rect x="330" y="28" width="160" height="44" rx="6" fill="rgba(62, 177, 200, 0.15)" stroke="#3eb1c8" stroke-width="1.5" />
-            <text x="410" y="47" text-anchor="middle" fill="#21899e" font-size="11.5" font-weight="700">Оточення кімнати (T_навк)</text>
-            <text x="410" y="63" text-anchor="middle" fill="#2a2a2a" font-size="11">Випромінює фон: (1 − ε)·σ·T_навк⁴</text>
+            <!-- Ambient Room Source (Top Right - wider box so formula fits cleanly inside) -->
+            <rect x="330" y="24" width="220" height="52" rx="6" fill="rgba(62, 177, 200, 0.14)" stroke="#3eb1c8" stroke-width="1.5" />
+            <text x="440" y="45" text-anchor="middle" fill="#21899e" font-size="12" font-weight="700">Оточення кімнати (T_навк)</text>
+            <text x="440" y="64" text-anchor="middle" fill="#2a2a2a" font-size="11">Випромінює фон: (1 − ε)·σ·T_навк⁴</text>
 
             <!-- Incident Ambient Ray hitting glossy wall and reflecting into camera -->
-            <path class="ir-ray-anim" d="M 380 72 L 262 155 L 515 162" fill="none" stroke="#3eb1c8" stroke-width="3" />
-            <text x="395" y="132" text-anchor="middle" fill="#21899e" font-size="11" font-weight="700">
-              Відбитий промінь (1 − ε)
+            <path class="ir-ray-anim" d="M 415 76 L 298 160 L 568 160" fill="none" stroke="#3eb1c8" stroke-width="3" />
+            <text x="442" y="146" text-anchor="middle" fill="#21899e" font-size="11" font-weight="700">
+              Відбитий промінь фону (1 − ε)
             </text>
 
             <!-- Direct Emitted IR Ray from cup wall to camera -->
-            <path class="ir-ray-anim" d="M 262 172 L 515 172" fill="none" stroke="#a0001b" stroke-width="4" />
-            <text x="390" y="194" text-anchor="middle" fill="#a0001b" font-size="11.5" font-weight="700">
-              Власне ІЧ-випромінювання чашки (ε · σ · T_пов⁴)
+            <path class="ir-ray-anim" d="M 298 184 L 568 184" fill="none" stroke="#a0001b" stroke-width="4" />
+            <text x="435" y="206" text-anchor="middle" fill="#a0001b" font-size="11" font-weight="700">
+              Власне ІЧ-випромінювання (ε · σ · T_пов⁴)
             </text>
 
             <!-- Thermal Imager Camera (Right) -->
-            <g transform="translate(515, 130)">
-              <rect x="0" y="18" width="22" height="40" rx="3" fill="#424242" />
-              <rect x="20" y="6" width="95" height="64" rx="8" fill="#2a2a2a" stroke="#fbba00" stroke-width="2" />
-              <text x="67" y="28" text-anchor="middle" fill="#fbba00" font-size="11" font-weight="700">ТЕПЛОВІЗОР</text>
-              <text x="67" y="48" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="700" id="svgCameraReadText">84.2 °C</text>
-              <text x="67" y="62" text-anchor="middle" fill="#3eb1c8" font-size="9.5">Безконтактний замір</text>
+            <g transform="translate(568, 128)">
+              <rect x="0" y="22" width="22" height="44" rx="3" fill="#424242" />
+              <rect x="20" y="6" width="112" height="76" rx="8" fill="#2a2a2a" stroke="#fbba00" stroke-width="2" />
+              <text x="76" y="29" text-anchor="middle" fill="#fbba00" font-size="11.5" font-weight="700">ТЕПЛОВІЗОР</text>
+              <text x="76" y="52" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="700" id="svgCameraReadText">83.7 °C</text>
+              <text x="76" y="70" text-anchor="middle" fill="#3eb1c8" font-size="10">Безконтактний замір</text>
             </g>
           </svg>
 
@@ -947,16 +948,16 @@
           if (mode === 'both') {
             svgUnins.style.display = 'block';
             svgIns.style.display = 'block';
-            svgUnins.setAttribute('transform', 'translate(65, 0)');
-            svgIns.setAttribute('transform', 'translate(385, 0)');
+            svgUnins.setAttribute('transform', 'translate(80, 0)');
+            svgIns.setAttribute('transform', 'translate(425, 0)');
           } else if (mode === 'uninsulated') {
             svgUnins.style.display = 'block';
             svgIns.style.display = 'none';
-            svgUnins.setAttribute('transform', 'translate(230, 0)');
+            svgUnins.setAttribute('transform', 'translate(250, 0)');
           } else {
             svgUnins.style.display = 'none';
             svgIns.style.display = 'block';
-            svgIns.setAttribute('transform', 'translate(225, 0)');
+            svgIns.setAttribute('transform', 'translate(250, 0)');
           }
         });
       });
@@ -1022,8 +1023,8 @@
           `Із них ${wallDrop.toFixed(1)} °C — через термічний опір стінки чашки, та ${opticalDiff.toFixed(1)} °C — оптична похибка невідповідності ε (${epsReal.toFixed(2)} vs ${epsCam.toFixed(2)}) і відбиття фону кімнати (20 °C).`;
 
         svgWaterTempText.textContent = `T₃ = ${tWater.toFixed(1)} °C`;
-        svgWallDropText.textContent = `Перепад ΔT_ст = −${wallDrop.toFixed(1)} °C`;
-        svgSurfaceTempText.textContent = `Зовн. поверхня: ${tSurf.toFixed(1)} °C`;
+        svgWallDropText.textContent = `ΔT_ст = −${wallDrop.toFixed(1)} °C`;
+        svgSurfaceTempText.textContent = `Зовн. стінка: ${tSurf.toFixed(1)} °C`;
         svgCameraReadText.textContent = `${tCam.toFixed(1)} °C`;
       }
 
