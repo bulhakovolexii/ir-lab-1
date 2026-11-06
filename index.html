@@ -1167,6 +1167,29 @@
 
     .camera-message.visible { display: flex; }
 
+    /* TEACHER BROADCAST (WebRTC from OBS via MediaMTX) */
+    #cameraSoundBtn { display: none; }
+    body.broadcast-mode #cameraSoundBtn { display: inline-flex; }
+    body.broadcast-mode #cameraMirrorBtn { display: none; }
+    body.broadcast-mode #cameraVideo.mirrored { transform: none; }
+    body.broadcast-only #cameraSelect { display: none; }
+
+    .live-dot {
+      display: none;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e53935;
+      flex-shrink: 0;
+      animation: live-pulse 1.6s ease-in-out infinite;
+    }
+    body.broadcast-only .live-dot { display: inline-block; }
+    @keyframes live-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    @media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
+
 
     /* INFO TOOLTIPS (hover on desktop, tap on touch) */
     .info-tip {
@@ -1603,7 +1626,7 @@
               <span>Криві охолодження $T(t)$<span class="hide-sm"> та апроксимація за законом Ньютона</span></span>
               <button type="button" class="info-tip" aria-label="Пояснення">?<span class="tip-body">Суцільні лінії — виміри, пунктирні — тренд за законом Ньютона:<br>$T(t) = T_{\text{навк}} + \Delta T_0 \cdot e^{-k \cdot t}$<br><br>Наведіть курсор або торкніться графіка, щоб побачити значення заміру. Клік по пункту легенди ховає чи показує серію.</span></button>
             </div>
-            <button class="btn btn-outline camera-toggle-btn" id="showCameraBtn" title="Показати камеру (Alt+C)">📷 Камера</button>
+            <button class="btn btn-outline camera-toggle-btn" id="showCameraBtn" title="Показати камеру (Alt+C)"><span class="live-dot"></span><span id="showCameraLabel">📷 Камера</span></button>
           </div>
 
           <div class="chart-legend-bar">
@@ -1633,17 +1656,18 @@
           </div>
         </div>
 
-        <!-- HIDDEN FEATURE: LIVE CAMERA (shown instead of chart when URL has ?camera) -->
+        <!-- LIVE CAMERA: local webcam with ?camera, or the teacher broadcast for everyone while it is live -->
         <div class="panel camera-panel" id="cameraPanel">
           <div class="panel-header">
             <div class="panel-title">
-              <span>Камера — live</span>
+              <span id="cameraPanelTitle">Камера — live</span>
             </div>
             <div class="camera-controls">
               <select class="camera-select" id="cameraSelect" title="Джерело відео">
                 <option value="">Пошук камер…</option>
               </select>
               <button class="btn btn-outline" id="showChartBtn" title="Показати графік (Alt+C)">📈 Графік</button>
+              <button class="btn btn-outline" id="cameraSoundBtn" title="Звук трансляції">🔊</button>
               <button class="btn btn-outline" id="cameraMirrorBtn" title="Дзеркально відобразити зображення">⇋</button>
               <button class="btn btn-outline" id="cameraFullscreenBtn" title="На весь екран">⛶</button>
             </div>
@@ -3357,27 +3381,37 @@
     })();
   </script>
   <script>
-    // HIDDEN FEATURE: live webcam instead of the chart. Enable with ?camera (or ?camera=1).
+    // LIVE CAMERA instead of the chart.
+    //  * ?camera (or ?camera=1): local webcam; the dropdown also offers the teacher broadcast.
+    //  * Everyone else: a "Трансляція" button appears while the teacher broadcast is live.
+    // Broadcast = OBS -> MediaMTX (WHIP) -> visitors (WHEP / WebRTC), see stream/README.md.
+    // ?stream=<whep-url> overrides the broadcast endpoint (e.g. http://localhost:8889/live/whep).
     // Switch chart <-> camera with the header buttons or Alt+C.
-    // Source is picked from the dropdown (remembered in localStorage).
     (function () {
       const params = new URLSearchParams(window.location.search);
-      if (!params.has('camera') || ['0', 'false', 'off'].includes(params.get('camera'))) return;
+      const teacherMode = params.has('camera') && !['0', 'false', 'off'].includes(params.get('camera'));
+      const STREAM_URL = params.get('stream') || 'https://2-31-45-45.sslip.io/live/whep';
+      const BROADCAST = '__broadcast__';
+      const BROADCAST_LABEL = 'Трансляція викладача';
+      const PROBE_INTERVAL_MS = 30000;
+      const RETRY_INTERVAL_MS = 5000;
 
       const MIRROR_KEY = 'thermo_lab_camera_mirror';
       const DEVICE_KEY = 'thermo_lab_camera_device';
+      const SOUND_KEY = 'thermo_lab_broadcast_sound';
 
       const select = document.getElementById('cameraSelect');
 
       const video = document.getElementById('cameraVideo');
       const message = document.getElementById('cameraMessage');
+      const panelTitle = document.getElementById('cameraPanelTitle');
+      const soundBtn = document.getElementById('cameraSoundBtn');
       const mirrorBtn = document.getElementById('cameraMirrorBtn');
       const fullscreenBtn = document.getElementById('cameraFullscreenBtn');
       const videoWrap = document.getElementById('cameraVideoWrap');
       const showCameraBtn = document.getElementById('showCameraBtn');
+      const showCameraLabel = document.getElementById('showCameraLabel');
       const showChartBtn = document.getElementById('showChartBtn');
-
-      document.body.classList.add('camera-enabled');
 
       let currentStream = null;
 
@@ -3388,11 +3422,187 @@
         try { return localStorage.getItem(key); } catch (e) { return null; }
       }
 
+      function inCameraMode() {
+        return document.body.classList.contains('camera-mode');
+      }
+
       function showMessage(text) {
         message.textContent = text;
         message.classList.toggle('visible', !!text);
       }
 
+      function fetchWithTimeout(url, options, ms) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), ms);
+        return fetch(url, Object.assign({}, options, { signal: ctrl.signal }))
+          .finally(() => clearTimeout(timer));
+      }
+
+      // ---- Teacher broadcast (WHEP) ----
+      let pc = null;
+      let sessionUrl = null;
+      let retryTimer = null;
+      let wantBroadcast = false;
+      let watchdogTimer = null;
+      let soundOn = recall(SOUND_KEY) !== '0';
+
+      function updateSoundBtn() {
+        soundBtn.textContent = video.muted ? '🔇' : '🔊';
+        soundBtn.title = video.muted ? 'Увімкнути звук трансляції' : 'Вимкнути звук трансляції';
+      }
+
+      function playVideo() {
+        video.muted = !soundOn;
+        updateSoundBtn();
+        video.play().catch(() => {
+          // Autoplay with sound was blocked — play muted, the viewer can unmute.
+          video.muted = true;
+          updateSoundBtn();
+          video.play().catch(() => {});
+        });
+      }
+
+      function closePeer() {
+        clearTimeout(retryTimer);
+        clearInterval(watchdogTimer);
+        if (pc) {
+          pc.ontrack = null;
+          pc.onconnectionstatechange = null;
+          pc.close();
+          pc = null;
+        }
+        if (sessionUrl) {
+          fetch(sessionUrl, { method: 'DELETE', keepalive: true }).catch(() => {});
+          sessionUrl = null;
+        }
+      }
+
+      function retryLater(text) {
+        closePeer();
+        video.srcObject = null;
+        showMessage(text);
+        if (wantBroadcast) retryTimer = setTimeout(connectBroadcast, RETRY_INTERVAL_MS);
+      }
+
+      function waitIceGathering(peer, ms) {
+        if (peer.iceGatheringState === 'complete') return Promise.resolve();
+        return new Promise((resolve) => {
+          const done = () => { peer.removeEventListener('icegatheringstatechange', check); resolve(); };
+          const check = () => { if (peer.iceGatheringState === 'complete') done(); };
+          peer.addEventListener('icegatheringstatechange', check);
+          setTimeout(done, ms);
+        });
+      }
+
+      // When OBS stops, the WebRTC connection may stay "connected" with a frozen
+      // last frame. Watch decoded frames and reconnect if they stop arriving.
+      function startWatchdog(peer) {
+        clearInterval(watchdogTimer);
+        let lastFrames = -1;
+        let stalls = 0;
+        watchdogTimer = setInterval(async () => {
+          if (pc !== peer) return;
+          let frames = 0;
+          try {
+            (await peer.getStats()).forEach((r) => {
+              if (r.type === 'inbound-rtp' && r.kind === 'video') frames += r.framesDecoded || 0;
+            });
+          } catch (e) { return; }
+          if (pc !== peer) return;
+          stalls = frames === lastFrames ? stalls + 1 : 0;
+          lastFrames = frames;
+          if (stalls >= 2) retryLater('Трансляцію перервано. Очікування відновлення…');
+        }, 2000);
+      }
+
+      async function connectBroadcast() {
+        if (!wantBroadcast) return;
+        closePeer();
+        if (!window.RTCPeerConnection) {
+          showMessage('Ваш браузер не підтримує WebRTC — трансляцію переглянути неможливо.');
+          return;
+        }
+        const peer = pc = new RTCPeerConnection();
+        peer.addTransceiver('video', { direction: 'recvonly' });
+        peer.addTransceiver('audio', { direction: 'recvonly' });
+        const remote = new MediaStream();
+        peer.ontrack = (e) => {
+          remote.addTrack(e.track);
+          if (video.srcObject !== remote) {
+            video.srcObject = remote;
+            playVideo();
+          }
+        };
+        peer.onconnectionstatechange = () => {
+          if (pc !== peer) return;
+          const state = peer.connectionState;
+          if (state === 'connected') {
+            showMessage('');
+            startWatchdog(peer);
+          }
+          else if (state === 'failed' || state === 'disconnected' || state === 'closed') {
+            retryLater('Трансляцію перервано. Очікування відновлення…');
+          }
+        };
+        try {
+          await peer.setLocalDescription(await peer.createOffer());
+          await waitIceGathering(peer, 1500);
+          const res = await fetchWithTimeout(STREAM_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/sdp' },
+            body: peer.localDescription.sdp,
+          }, 8000);
+          if (pc !== peer) return;
+          if (res.status === 404) {
+            retryLater('Трансляція зараз не ведеться. Відео з’явиться автоматично, щойно вона почнеться.');
+            return;
+          }
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const location = res.headers.get('Location');
+          if (location) sessionUrl = new URL(location, STREAM_URL).href;
+          const answer = await res.text();
+          if (pc !== peer) return;
+          await peer.setRemoteDescription({ type: 'answer', sdp: answer });
+        } catch (err) {
+          if (pc === peer) retryLater('Сервер трансляції недоступний. Повторна спроба…');
+        }
+      }
+
+      function startBroadcast() {
+        wantBroadcast = true;
+        document.body.classList.add('broadcast-mode');
+        panelTitle.textContent = BROADCAST_LABEL + ' — live';
+        if (teacherMode) {
+          store(DEVICE_KEY, BROADCAST);
+          populateDevices(BROADCAST);
+        }
+        showMessage('Підключення до трансляції…');
+        connectBroadcast();
+      }
+
+      function stopBroadcast() {
+        wantBroadcast = false;
+        closePeer();
+        document.body.classList.remove('broadcast-mode');
+        panelTitle.textContent = 'Камера — live';
+      }
+
+      // Cheap liveness check without opening a WebRTC session:
+      // MediaMTX answers 404 when nobody publishes, 400 (bad SDP) when the stream is live.
+      async function isBroadcastLive() {
+        try {
+          const res = await fetchWithTimeout(STREAM_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/sdp' },
+            body: 'v=0',
+          }, 5000);
+          return res.status === 400;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      // ---- Local webcam ----
       function isStreamAlive() {
         const track = currentStream && currentStream.getVideoTracks()[0];
         return !!track && track.readyState === 'live';
@@ -3403,39 +3613,52 @@
           currentStream.getTracks().forEach((t) => t.stop());
           currentStream = null;
         }
+        stopBroadcast();
         video.srcObject = null;
+        video.muted = true;
       }
 
       async function populateDevices(selectedId) {
+        if (!teacherMode) return;
         let devices = [];
         try {
           devices = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'videoinput');
         } catch (e) { /* ignore */ }
 
         select.innerHTML = '';
-        if (!devices.length) {
-          select.innerHTML = '<option value="">Камер не знайдено</option>';
-          select.disabled = true;
-          return;
-        }
-        select.disabled = false;
         devices.forEach((d, i) => {
           const opt = document.createElement('option');
           opt.value = d.deviceId;
           opt.textContent = d.label || `Камера ${i + 1}`;
           select.appendChild(opt);
         });
-        if (selectedId && devices.some((d) => d.deviceId === selectedId)) {
+        if (!devices.length) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = 'Камер не знайдено';
+          opt.disabled = true;
+          select.appendChild(opt);
+        }
+        const broadcastOpt = document.createElement('option');
+        broadcastOpt.value = BROADCAST;
+        broadcastOpt.textContent = '📡 ' + BROADCAST_LABEL;
+        select.appendChild(broadcastOpt);
+
+        if (selectedId && [...select.options].some((o) => o.value === selectedId)) {
           select.value = selectedId;
         }
       }
 
       async function startStream(deviceId) {
         if (deviceId === undefined) {
-          if (isStreamAlive()) return;
-          deviceId = recall(DEVICE_KEY) || '';
+          if (isStreamAlive() || wantBroadcast) return;
+          deviceId = teacherMode ? (recall(DEVICE_KEY) || '') : BROADCAST;
         }
         stopStream();
+        if (deviceId === BROADCAST) {
+          startBroadcast();
+          return;
+        }
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           showMessage('Доступ до камери недоступний. Відкрийте сторінку через HTTPS або localhost.');
           return;
@@ -3445,9 +3668,10 @@
           const videoConstraints = { width: { ideal: 1920 }, height: { ideal: 1080 } };
           if (deviceId) videoConstraints.deviceId = { exact: deviceId };
           currentStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: videoConstraints });
-          // Mode may have been switched back to chart while waiting for permission.
-          if (!document.body.classList.contains('camera-mode')) {
-            stopStream();
+          // Mode/source may have been switched while waiting for permission.
+          if (!inCameraMode() || wantBroadcast) {
+            if (currentStream) currentStream.getTracks().forEach((t) => t.stop());
+            currentStream = null;
             return;
           }
           video.srcObject = currentStream;
@@ -3459,7 +3683,7 @@
           await populateDevices(activeId);
           if (track) {
             track.addEventListener('ended', () => {
-              if (document.body.classList.contains('camera-mode')) {
+              if (inCameraMode() && currentStream && currentStream.getVideoTracks()[0] === track) {
                 showMessage('Камеру відключено. Оберіть іншу камеру зі списку або підключіть її знову.');
               }
             });
@@ -3482,6 +3706,7 @@
       }
 
       function setMode(camera) {
+        if (camera && !document.body.classList.contains('camera-enabled')) return;
         document.body.classList.toggle('camera-mode', camera);
         if (camera) {
           startStream();
@@ -3490,15 +3715,16 @@
           stopStream();
           // Chart was hidden (zero size) — trigger its resize-based redraw.
           window.dispatchEvent(new Event('resize'));
+          if (!teacherMode) probeLoop();
         }
       }
 
       function toggleMode() {
-        setMode(!document.body.classList.contains('camera-mode'));
+        setMode(!inCameraMode());
       }
 
       select.addEventListener('change', () => {
-        if (select.value) startStream(select.value);
+        startStream(select.value);
       });
 
       showCameraBtn.addEventListener('click', () => setMode(true));
@@ -3506,9 +3732,16 @@
 
       document.addEventListener('keydown', (e) => {
         if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && e.code === 'KeyC') {
+          if (!document.body.classList.contains('camera-enabled')) return;
           e.preventDefault();
           toggleMode();
         }
+      });
+
+      soundBtn.addEventListener('click', () => {
+        soundOn = video.muted;
+        store(SOUND_KEY, soundOn ? '1' : '0');
+        playVideo();
       });
 
       if (recall(MIRROR_KEY) === '1') video.classList.add('mirrored');
@@ -3526,9 +3759,9 @@
       });
 
       // Camera plugged/unplugged — refresh the list, reconnect if the stream died.
-      if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+      if (teacherMode && navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
         navigator.mediaDevices.addEventListener('devicechange', () => {
-          if (!document.body.classList.contains('camera-mode')) return;
+          if (!inCameraMode() || wantBroadcast) return;
           if (isStreamAlive()) populateDevices(select.value);
           else startStream();
         });
@@ -3536,7 +3769,35 @@
 
       window.addEventListener('pagehide', stopStream);
 
-      setMode(true);
+      // Visitors: show the "Трансляція" button only while the broadcast is live.
+      let probeTimer = null;
+      let probing = false;
+      async function probeLoop() {
+        clearTimeout(probeTimer);
+        if (inCameraMode()) return;
+        if (document.visibilityState === 'visible' && !probing) {
+          probing = true;
+          const live = await isBroadcastLive();
+          probing = false;
+          if (!inCameraMode()) document.body.classList.toggle('camera-enabled', live);
+        }
+        clearTimeout(probeTimer);
+        if (!inCameraMode()) probeTimer = setTimeout(probeLoop, PROBE_INTERVAL_MS);
+      }
+
+      if (teacherMode) {
+        document.body.classList.add('camera-enabled');
+        setMode(true);
+      } else {
+        document.body.classList.add('broadcast-only');
+        select.innerHTML = `<option value="${BROADCAST}">${BROADCAST_LABEL}</option>`;
+        showCameraLabel.textContent = 'Трансляція';
+        showCameraBtn.title = 'Дивитися трансляцію викладача (Alt+C)';
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible' && !inCameraMode()) probeLoop();
+        });
+        probeLoop();
+      }
     })();
   </script>
 </body>

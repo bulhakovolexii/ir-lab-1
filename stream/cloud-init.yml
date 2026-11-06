@@ -1,0 +1,128 @@
+#cloud-config
+# Hetzner Cloud server for the teacher broadcast (OBS -> MediaMTX -> WebRTC viewers).
+# Paste into "Cloud config" when creating an Ubuntu 24.04 server. See stream/README.md.
+#
+# Before pasting, replace __OBS_TOKEN__ (one place below) with a long random
+# password: letters and digits only. stream/cloud-init.local.yml (git-ignored)
+# already has it filled in.
+#
+# Result: https://<ip-with-dashes>.sslip.io/live/whep (viewers)
+#         https://<ip-with-dashes>.sslip.io/live/whip (OBS, Bearer token "obs:<token>")
+
+package_update: true
+packages:
+  - caddy
+  - curl
+
+write_files:
+  - path: /etc/mediamtx/mediamtx.yml
+    permissions: "0600"
+    content: |
+      logLevel: info
+
+      # Only WebRTC (WHIP in, WHEP out) is used.
+      rtsp: false
+      rtmp: false
+      hls: false
+      srt: false
+      moq: false
+      api: false
+      metrics: false
+      pprof: false
+      playback: false
+
+      authMethod: internal
+      authInternalUsers:
+        # OBS: Bearer token "obs:<token>".
+        - user: obs
+          pass: __OBS_TOKEN__
+          ips: []
+          permissions:
+            - action: publish
+              path: live
+        # Viewers: anyone may watch.
+        - user: any
+          pass:
+          ips: []
+          permissions:
+            - action: read
+              path: live
+
+      # HTTP signalling on localhost only; Caddy adds HTTPS in front.
+      webrtc: true
+      webrtcAddress: 127.0.0.1:8889
+      webrtcEncryption: false
+      webrtcAllowOrigins: ["*"]
+      webrtcTrustedProxies: ["127.0.0.1", "::1"]
+      # Media goes directly to the server's public IP (on the interface).
+      webrtcLocalUDPAddress: :8189
+      # TCP fallback for networks that block UDP.
+      webrtcLocalTCPAddress: :8189
+      webrtcIPsFromInterfaces: true
+
+      paths:
+        live:
+
+  - path: /etc/systemd/system/mediamtx.service
+    content: |
+      [Unit]
+      Description=MediaMTX (teacher broadcast)
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      # The config holds the OBS token (root-only file); systemd hands a copy to the service.
+      LoadCredential=mediamtx.yml:/etc/mediamtx/mediamtx.yml
+      ExecStart=/usr/local/bin/mediamtx ${CREDENTIALS_DIRECTORY}/mediamtx.yml
+      Restart=always
+      RestartSec=2
+      DynamicUser=yes
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /usr/local/sbin/setup-broadcast.sh
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+      set -euo pipefail
+      MEDIAMTX_VERSION=v1.21.3
+
+      case "$(uname -m)" in
+        x86_64) ARCH=amd64 ;;
+        aarch64) ARCH=arm64 ;;
+        *) echo "unsupported arch $(uname -m)"; exit 1 ;;
+      esac
+      tmp=$(mktemp -d)
+      curl -fsSL -o "$tmp/m.tgz" \
+        "https://github.com/bluenviron/mediamtx/releases/download/${MEDIAMTX_VERSION}/mediamtx_${MEDIAMTX_VERSION}_linux_${ARCH}.tar.gz"
+      tar -xzf "$tmp/m.tgz" -C "$tmp" mediamtx
+      install -m 0755 "$tmp/mediamtx" /usr/local/bin/mediamtx
+      rm -rf "$tmp"
+
+      # Domain from the public IP: 1.2.3.4 -> 1-2-3-4.sslip.io
+      IP=$(curl -fsS http://169.254.169.254/hetzner/v1/metadata/public-ipv4 || curl -fsS -4 https://ifconfig.me)
+      DOMAIN="${IP//./-}.sslip.io"
+      echo "$DOMAIN" > /etc/broadcast-domain
+
+      cat > /etc/caddy/Caddyfile <<EOF
+      ${DOMAIN} {
+      	# Only WHIP (OBS, token-protected) and WHEP (viewers) are exposed.
+      	@webrtc path /live/whep /live/whep/* /live/whip /live/whip/*
+      	handle @webrtc {
+      		reverse_proxy 127.0.0.1:8889
+      	}
+      	handle {
+      		respond "Broadcast server" 200
+      	}
+      }
+      EOF
+
+      systemctl daemon-reload
+      systemctl enable --now mediamtx
+      systemctl restart caddy
+
+      echo "Broadcast server ready: https://${DOMAIN}"
+
+runcmd:
+  - /usr/local/sbin/setup-broadcast.sh
