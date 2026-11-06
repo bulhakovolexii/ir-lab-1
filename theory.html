@@ -62,6 +62,20 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    /* Hide on scroll down, show on scroll up */
+    .top-nav.nav-hidden {
+      transform: translateY(-100%);
+    }
+
+    .top-nav.nav-scrolled:not(.nav-hidden) {
+      box-shadow: 0 4px 16px rgba(42, 42, 42, 0.08);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .top-nav { transition: none; }
     }
 
     .nav-brand {
@@ -1067,6 +1081,41 @@
       window.addEventListener('load', renderAllMath);
       updateSimulator();
       renderAllMath();
+
+      // Auto-hide header: hide while scrolling down, show when scrolling up or near the top.
+      const topNav = document.querySelector('.top-nav');
+      if (topNav) {
+        let lastY = window.scrollY;
+        let ticking = false;
+        const THRESHOLD = 6;
+
+        const updateNav = () => {
+          ticking = false;
+          const y = Math.max(0, window.scrollY);
+          const delta = y - lastY;
+          const navH = topNav.offsetHeight;
+
+          topNav.classList.toggle('nav-scrolled', y > 0);
+          if (y <= navH) {
+            topNav.classList.remove('nav-hidden');
+          } else if (delta > THRESHOLD) {
+            topNav.classList.add('nav-hidden');
+          } else if (delta < -THRESHOLD) {
+            topNav.classList.remove('nav-hidden');
+          }
+          if (Math.abs(delta) > THRESHOLD) lastY = y;
+        };
+
+        window.addEventListener('scroll', () => {
+          if (!ticking) {
+            ticking = true;
+            requestAnimationFrame(updateNav);
+          }
+        }, { passive: true });
+
+        // Show the header again when keyboard focus lands in it.
+        topNav.addEventListener('focusin', () => topNav.classList.remove('nav-hidden'));
+      }
     })();
   </script>
 </body>
