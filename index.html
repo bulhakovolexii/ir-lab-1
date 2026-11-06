@@ -3390,7 +3390,9 @@
     (function () {
       const params = new URLSearchParams(window.location.search);
       const teacherMode = params.has('camera') && !['0', 'false', 'off'].includes(params.get('camera'));
-      const STREAM_URL = params.get('stream') || 'https://2-31-45-45.sslip.io/live/whep';
+      // Broadcast server host. Set with stream/set-server.sh; '' = no broadcast (no requests at all).
+      const BROADCAST_SERVER = '';
+      const STREAM_URL = params.get('stream') || (BROADCAST_SERVER ? `https://${BROADCAST_SERVER}/live/whep` : '');
       const BROADCAST = '__broadcast__';
       const BROADCAST_LABEL = 'Трансляція викладача';
       const PROBE_INTERVAL_MS = 30000;
@@ -3639,10 +3641,12 @@
           opt.disabled = true;
           select.appendChild(opt);
         }
-        const broadcastOpt = document.createElement('option');
-        broadcastOpt.value = BROADCAST;
-        broadcastOpt.textContent = '📡 ' + BROADCAST_LABEL;
-        select.appendChild(broadcastOpt);
+        if (STREAM_URL) {
+          const broadcastOpt = document.createElement('option');
+          broadcastOpt.value = BROADCAST;
+          broadcastOpt.textContent = '📡 ' + BROADCAST_LABEL;
+          select.appendChild(broadcastOpt);
+        }
 
         if (selectedId && [...select.options].some((o) => o.value === selectedId)) {
           select.value = selectedId;
@@ -3654,6 +3658,7 @@
           if (isStreamAlive() || wantBroadcast) return;
           deviceId = teacherMode ? (recall(DEVICE_KEY) || '') : BROADCAST;
         }
+        if (deviceId === BROADCAST && !STREAM_URL) deviceId = '';
         stopStream();
         if (deviceId === BROADCAST) {
           startBroadcast();
@@ -3788,7 +3793,7 @@
       if (teacherMode) {
         document.body.classList.add('camera-enabled');
         setMode(true);
-      } else {
+      } else if (STREAM_URL) {
         document.body.classList.add('broadcast-only');
         select.innerHTML = `<option value="${BROADCAST}">${BROADCAST_LABEL}</option>`;
         showCameraLabel.textContent = 'Трансляція';
