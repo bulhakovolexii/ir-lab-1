@@ -1086,6 +1086,18 @@
       gap: 10px;
     }
 
+    .modal-actions .btn {
+      white-space: normal;
+      justify-content: center;
+      text-align: center;
+    }
+
+    @media (max-width: 520px) {
+      .modal-box { padding: 18px 16px; }
+      .modal-actions { flex-direction: column-reverse; }
+      .modal-actions .btn { width: 100%; padding-top: 11px; padding-bottom: 11px; }
+    }
+
     /* HIDDEN FEATURE: LIVE CAMERA (enabled via ?camera URL parameter) */
     .camera-panel {
       flex: 1;
@@ -2595,7 +2607,17 @@
           ctx.font = '600 11.5px "Fira Sans", sans-serif';
           ctx.textAlign = 'left';
           ctx.textBaseline = 'bottom';
-          ctx.fillText(`T_навк = ${tAmb}°C`, padLeft + 6, pyAmb - 3);
+          // Canvas can't render LaTeX — draw T with a "навк" subscript manually (KaTeX-like fonts).
+          let lx = padLeft + 6;
+          const ly = pyAmb - 4;
+          ctx.font = 'italic 14px KaTeX_Math, "Times New Roman", serif';
+          ctx.fillText('T', lx, ly);
+          lx += ctx.measureText('T').width + 0.5;
+          ctx.font = '10px KaTeX_Main, "Times New Roman", serif';
+          ctx.fillText('навк', lx, ly + 3);
+          lx += ctx.measureText('навк').width + 3;
+          ctx.font = '600 11.5px "Fira Sans", sans-serif';
+          ctx.fillText(`= ${tAmb} °C`, lx, ly);
           ctx.restore();
         }
 
@@ -2706,11 +2728,26 @@
           ctx.font = '500 13.5px "Fira Sans", sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(
-            'Введіть значення температур у таблицю ліворуч або натисніть «🧪 Тестові дані»',
-            padLeft + plotW / 2,
-            padTop + plotH / 2
-          );
+          // Canvas doesn't wrap text — split into lines that fit the plot width.
+          const where = window.innerWidth < 1200 ? 'вище' : 'ліворуч';
+          // Non-breaking spaces keep the menu path on one line.
+          const hint = `Введіть значення температур у таблицю ${where} або натисніть «Меню\u00A0→\u00A0🧪\u00A0Тестові\u00A0дані»`;
+          const maxLineW = Math.max(120, plotW - 24);
+          const lines = [];
+          let line = '';
+          for (const word of hint.split(' ')) {
+            const test = line ? `${line} ${word}` : word;
+            if (line && ctx.measureText(test).width > maxLineW) {
+              lines.push(line);
+              line = word;
+            } else {
+              line = test;
+            }
+          }
+          if (line) lines.push(line);
+          const lineH = 19;
+          const startY = padTop + plotH / 2 - ((lines.length - 1) * lineH) / 2;
+          lines.forEach((ln, i) => ctx.fillText(ln, padLeft + plotW / 2, startY + i * lineH));
         }
 
         // Hover vertical line
@@ -3178,6 +3215,8 @@
       recalculateAndDraw();
       startTimerLoop();
       initMathRendering();
+      // Redraw once web fonts (Fira Sans, KaTeX) are ready so canvas labels use them.
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => drawChart());
     })();
   </script>
   <script>
@@ -3282,8 +3321,15 @@
         btn.classList.toggle('active', open);
         btn.setAttribute('aria-expanded', String(open));
         if (open) {
-          const r = wrap.getBoundingClientRect();
-          menu.classList.toggle('align-left', r.right < Math.min(300, window.innerWidth - 28) + 12);
+          // Right-align to the button, then shift so the menu stays inside the viewport.
+          menu.classList.remove('align-left');
+          menu.style.right = '0px';
+          const r = menu.getBoundingClientRect();
+          const margin = 12;
+          let shift = 0;
+          if (r.left < margin) shift = r.left - margin;
+          else if (r.right > window.innerWidth - margin) shift = r.right - (window.innerWidth - margin);
+          menu.style.right = `${shift}px`;
         }
       }
 
