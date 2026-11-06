@@ -1127,6 +1127,19 @@
       min-width: 0;
     }
 
+    .camera-select {
+      font-family: 'Fira Sans', sans-serif;
+      font-size: 12px;
+      padding: 4px 8px;
+      border: 1px solid var(--border-strong);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--dark);
+      max-width: 260px;
+      min-width: 0;
+      cursor: pointer;
+    }
+
     .camera-video-wrap {
       position: relative;
       flex: 1;
@@ -1369,6 +1382,9 @@
               <span>Камера — live</span>
             </div>
             <div class="camera-controls">
+              <select class="camera-select" id="cameraSelect" title="Джерело відео">
+                <option value="">Пошук камер…</option>
+              </select>
               <button class="btn btn-outline" id="showChartBtn" title="Показати графік (Alt+C)">📈 Графік</button>
               <button class="btn btn-outline" id="cameraMirrorBtn" title="Дзеркально відобразити зображення">⇋</button>
               <button class="btn btn-outline" id="cameraFullscreenBtn" title="На весь екран">⛶</button>
@@ -2895,12 +2911,15 @@
   <script>
     // HIDDEN FEATURE: live webcam instead of the chart. Enable with ?camera (or ?camera=1).
     // Switch chart <-> camera with the header buttons or Alt+C.
-    // The camera source itself is chosen in the browser (Chrome: camera icon in the address bar).
+    // Source is picked from the dropdown (remembered in localStorage).
     (function () {
       const params = new URLSearchParams(window.location.search);
       if (!params.has('camera') || ['0', 'false', 'off'].includes(params.get('camera'))) return;
 
       const MIRROR_KEY = 'thermo_lab_camera_mirror';
+      const DEVICE_KEY = 'thermo_lab_camera_device';
+
+      const select = document.getElementById('cameraSelect');
 
       const video = document.getElementById('cameraVideo');
       const message = document.getElementById('cameraMessage');
@@ -2939,8 +2958,35 @@
         video.srcObject = null;
       }
 
-      async function startStream() {
-        if (isStreamAlive()) return;
+      async function populateDevices(selectedId) {
+        let devices = [];
+        try {
+          devices = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'videoinput');
+        } catch (e) { /* ignore */ }
+
+        select.innerHTML = '';
+        if (!devices.length) {
+          select.innerHTML = '<option value="">Камер не знайдено</option>';
+          select.disabled = true;
+          return;
+        }
+        select.disabled = false;
+        devices.forEach((d, i) => {
+          const opt = document.createElement('option');
+          opt.value = d.deviceId;
+          opt.textContent = d.label || `Камера ${i + 1}`;
+          select.appendChild(opt);
+        });
+        if (selectedId && devices.some((d) => d.deviceId === selectedId)) {
+          select.value = selectedId;
+        }
+      }
+
+      async function startStream(deviceId) {
+        if (deviceId === undefined) {
+          if (isStreamAlive()) return;
+          deviceId = recall(DEVICE_KEY) || '';
+        }
         stopStream();
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           showMessage('Доступ до камери недоступний. Відкрийте сторінку через HTTPS або localhost.');
@@ -2948,10 +2994,9 @@
         }
         showMessage('Підключення до камери…');
         try {
-          currentStream = await navigator.mediaDevices.getUserMedia({
-            audio: false,
-            video: { width: { ideal: 1920 }, height: { ideal: 1080 } }
-          });
+          const videoConstraints = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+          if (deviceId) videoConstraints.deviceId = { exact: deviceId };
+          currentStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: videoConstraints });
           // Mode may have been switched back to chart while waiting for permission.
           if (!document.body.classList.contains('camera-mode')) {
             stopStream();
@@ -2960,14 +3005,23 @@
           video.srcObject = currentStream;
           showMessage('');
           const track = currentStream.getVideoTracks()[0];
+          const activeId = track && track.getSettings ? track.getSettings().deviceId : deviceId;
+          if (activeId) store(DEVICE_KEY, activeId);
+          // Device labels/ids become available only after permission is granted.
+          await populateDevices(activeId);
           if (track) {
             track.addEventListener('ended', () => {
               if (document.body.classList.contains('camera-mode')) {
-                showMessage('Камеру відключено. Оберіть камеру в налаштуваннях браузера або підключіть її знову.');
+                showMessage('Камеру відключено. Оберіть іншу камеру зі списку або підключіть її знову.');
               }
             });
           }
         } catch (err) {
+          if (deviceId && (err.name === 'OverconstrainedError' || err.name === 'NotFoundError')) {
+            // Saved camera is gone — fall back to the default one.
+            return startStream('');
+          }
+          await populateDevices(deviceId);
           const reason = err.name === 'NotAllowedError'
             ? 'Доступ до камери заборонено. Дозвольте його в налаштуваннях браузера.'
             : err.name === 'NotReadableError'
@@ -2995,6 +3049,10 @@
         setMode(!document.body.classList.contains('camera-mode'));
       }
 
+      select.addEventListener('change', () => {
+        if (select.value) startStream(select.value);
+      });
+
       showCameraBtn.addEventListener('click', () => setMode(true));
       showChartBtn.addEventListener('click', () => setMode(false));
 
@@ -3019,10 +3077,12 @@
         }
       });
 
-      // Camera switched/reconnected (e.g. via Chrome's camera menu) — reconnect if the stream died.
+      // Camera plugged/unplugged — refresh the list, reconnect if the stream died.
       if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
         navigator.mediaDevices.addEventListener('devicechange', () => {
-          if (document.body.classList.contains('camera-mode') && !isStreamAlive()) startStream();
+          if (!document.body.classList.contains('camera-mode')) return;
+          if (isStreamAlive()) populateDevices(select.value);
+          else startStream();
         });
       }
 
