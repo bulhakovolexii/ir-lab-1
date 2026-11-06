@@ -229,9 +229,35 @@
 
     .grid-2col {
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
       gap: 24px;
       align-items: start;
+    }
+
+    .grid-2col > * { min-width: 0; }
+
+    /* Visualization sticks to the top of the viewport while the neighbouring column scrolls.
+       Enabled by JS (.sticky-ok) only when the stage fits into the viewport. */
+    :root { --sticky-top: 16px; }
+
+    @media (min-width: 921px) {
+      .grid-2col > .anim-stage.sticky-ok {
+        position: sticky;
+        top: var(--sticky-top);
+        transition: top 0.25s ease;
+        z-index: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .grid-2col > .anim-stage.sticky-ok { transition: none; }
+    }
+
+    /* Long display formulas scroll inside their block instead of widening the page */
+    .katex-display {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 2px 0;
     }
 
     /* Animated SVG Stage */
@@ -433,7 +459,10 @@
       font-weight: 600;
     }
 
+    .slider-header { gap: 10px; }
+
     .slider-val {
+      white-space: nowrap;
       color: var(--primary);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
@@ -468,6 +497,11 @@
     .preset-btn:hover {
       border-color: var(--primary);
       color: var(--primary);
+    }
+
+    .preset-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
     }
 
     .sim-readouts {
@@ -522,12 +556,17 @@
 
     @media (max-width: 920px) {
       .grid-2col {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
       }
       .sim-readouts {
         grid-template-columns: 1fr;
       }
     }
+
+    /* KaTeX-like math inside SVG diagrams (SVG text can't be rendered by KaTeX) */
+    svg .mv { font-family: KaTeX_Math, 'Times New Roman', serif; font-style: italic; font-weight: 400; font-size: 1.15em; }
+    svg .mm { font-family: KaTeX_Main, 'Times New Roman', serif; font-weight: 400; font-size: 1.1em; }
+    svg .ms { font-family: KaTeX_Main, 'Times New Roman', serif; font-weight: 400; font-size: 0.8em; }
   </style>
 </head>
 <body>
@@ -582,7 +621,7 @@
             </div>
           </div>
 
-          <svg id="cupsSvg" viewBox="0 0 740 375" width="100%" height="auto" style="background:#fff; border-radius:8px; border:1px solid #ececec;">
+          <svg id="cupsSvg" viewBox="0 0 740 375" width="100%" style="background:#fff; border-radius:8px; border:1px solid #ececec;">
             <defs>
               <linearGradient id="hotWaterGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#a0001b" stop-opacity="0.9" />
@@ -630,7 +669,7 @@
               <path d="M 205 112 L 142 112 L 142 225" fill="none" stroke="#2a2a2a" stroke-width="2.5" stroke-dasharray="3 2" />
               <circle cx="142" cy="225" r="4.5" fill="#a0001b" stroke="#fff" stroke-width="1.5" />
               <rect x="176" y="96" width="76" height="20" rx="4" fill="#2a2a2a" />
-              <text x="214" y="110" text-anchor="middle" fill="#fbba00" font-size="10" font-weight="700">Термопара T₃</text>
+              <text x="214" y="110" text-anchor="middle" fill="#fbba00" font-size="10" font-weight="700">Термопара <tspan class="mv">T</tspan><tspan class="ms" dy="3">3</tspan></text>
 
               <!-- Side Radiation Waves (cleanly separated on the left) -->
               <path class="rad-wave-l" d="M 52 175 Q 44 200 52 225" fill="none" stroke="#3eb1c8" stroke-width="2.5" stroke-linecap="round" />
@@ -677,7 +716,7 @@
               <rect x="57" y="274" width="126" height="15" rx="3" fill="#d9a05b" stroke="#2a2a2a" stroke-width="2" />
               <line x1="61" y1="281" x2="179" y2="281" stroke="#fff" stroke-width="1.5" stroke-dasharray="4 4" />
               <text x="120" y="332" text-anchor="middle" fill="#c49000" font-size="11" font-weight="700">
-                📦 Пористий картон (λ ≈ 0.07 Вт/(м·К)) ізолює дно
+                📦 Пористий картон (<tspan class="mv">λ</tspan> ≈ 0.07 Вт/(м·К)) ізолює дно
               </text>
 
               <!-- Side mild radiation -->
@@ -763,11 +802,11 @@
         <!-- Animated Diagram of Wall Gradient + Emissivity Reflection -->
         <div class="anim-stage">
           <strong style="font-size: 13.5px;">Анімована схема формування інфрачервоного сигналу на стінці чашки:</strong>
-          <svg viewBox="0 0 720 340" width="100%" height="auto" style="background:#fff; border-radius:8px; border:1px solid #ececec;">
+          <svg viewBox="0 0 720 340" width="100%" style="background:#fff; border-radius:8px; border:1px solid #ececec;">
             <!-- Hot Water Zone (Left) -->
             <rect x="18" y="24" width="164" height="280" rx="6" fill="rgba(160, 0, 27, 0.12)" stroke="#a0001b" stroke-width="1.5" />
             <text x="100" y="48" text-anchor="middle" fill="#a0001b" font-size="13" font-weight="700">ГАРЯЧА ВОДА</text>
-            <text x="100" y="68" text-anchor="middle" fill="#2a2a2a" font-size="12.5" font-weight="700" id="svgWaterTempText">T₃ = 90.0 °C</text>
+            <text x="100" y="68" text-anchor="middle" fill="#2a2a2a" font-size="12.5" font-weight="700" id="svgWaterTempText"><tspan class="mv">T</tspan><tspan class="ms" dy="3">3</tspan><tspan dy="-3"> = 90.0 °C</tspan></text>
 
             <!-- Thermocouple sensor inside water (starts below text so wire never crosses labels) -->
             <path d="M 18 92 L 100 92 L 100 182" fill="none" stroke="#2a2a2a" stroke-width="3" stroke-dasharray="4 2" />
@@ -778,14 +817,14 @@
             <!-- Ceramic Cup Wall (Middle) -->
             <rect x="182" y="24" width="114" height="280" fill="#f3efe6" stroke="#2a2a2a" stroke-width="2.5" />
             <text x="239" y="48" text-anchor="middle" fill="#2a2a2a" font-size="12.5" font-weight="700">СТІНКА ЧАШКИ</text>
-            <text x="239" y="66" text-anchor="middle" fill="#686868" font-size="10.5">Термічний опір δ/λ</text>
+            <text x="239" y="66" text-anchor="middle" fill="#686868" font-size="10.5">Термічний опір <tspan class="mv">δ</tspan>/<tspan class="mv">λ</tspan></text>
 
             <!-- Temperature gradient line inside wall -->
             <path d="M 182 130 L 296 172" stroke="#fbba00" stroke-width="4" />
             <circle cx="182" cy="130" r="4.5" fill="#a0001b" />
             <circle cx="296" cy="172" r="5.5" fill="#fbba00" stroke="#2a2a2a" stroke-width="1.5" />
             <text x="239" y="240" text-anchor="middle" fill="#c49000" font-size="11" font-weight="700" id="svgWallDropText">
-              ΔT_ст = −2.5 °C
+              <tspan class="mm">Δ</tspan><tspan class="mv">T</tspan><tspan class="ms" dy="3">ст</tspan><tspan dy="-3"> = −2.5 °C</tspan>
             </text>
             <text x="239" y="275" text-anchor="middle" fill="#2a2a2a" font-size="10.5" font-weight="700" id="svgSurfaceTempText">
               Зовн. стінка: 87.5 °C
@@ -793,19 +832,19 @@
 
             <!-- Ambient Room Source (Top Right - wider box so formula fits cleanly inside) -->
             <rect x="330" y="24" width="220" height="52" rx="6" fill="rgba(62, 177, 200, 0.14)" stroke="#3eb1c8" stroke-width="1.5" />
-            <text x="440" y="45" text-anchor="middle" fill="#21899e" font-size="12" font-weight="700">Оточення кімнати (T_навк)</text>
-            <text x="440" y="64" text-anchor="middle" fill="#2a2a2a" font-size="11">Випромінює фон: (1 − ε)·σ·T_навк⁴</text>
+            <text x="440" y="45" text-anchor="middle" fill="#21899e" font-size="12" font-weight="700" id="svgAmbText">Оточення кімнати (<tspan class="mv">T</tspan><tspan class="ms" dy="3">навк</tspan><tspan dy="-3"> = 20 °C)</tspan></text>
+            <text x="440" y="64" text-anchor="middle" fill="#2a2a2a" font-size="11">Випромінює фон: (1 − <tspan class="mv">ε</tspan>)·<tspan class="mv">σ</tspan>·<tspan class="mv">T</tspan><tspan class="ms" dy="3">навк</tspan><tspan class="ms sup-stack" dy="-9">4</tspan></text>
 
             <!-- Incident Ambient Ray hitting glossy wall and reflecting into camera -->
             <path class="ir-ray-anim" d="M 415 76 L 298 160 L 568 160" fill="none" stroke="#3eb1c8" stroke-width="3" />
             <text x="442" y="146" text-anchor="middle" fill="#21899e" font-size="11" font-weight="700">
-              Відбитий промінь фону (1 − ε)
+              Відбитий промінь фону (1 − <tspan class="mv">ε</tspan>)
             </text>
 
             <!-- Direct Emitted IR Ray from cup wall to camera -->
             <path class="ir-ray-anim" d="M 298 184 L 568 184" fill="none" stroke="#a0001b" stroke-width="4" />
             <text x="435" y="206" text-anchor="middle" fill="#a0001b" font-size="11" font-weight="700">
-              Власне ІЧ-випромінювання (ε · σ · T_пов⁴)
+              Власне ІЧ-випромінювання (<tspan class="mv">ε</tspan> · <tspan class="mv">σ</tspan> · <tspan class="mv">T</tspan><tspan class="ms" dy="3">пов</tspan><tspan class="ms sup-stack" dy="-9">4</tspan><tspan dy="6">)</tspan>
             </text>
 
             <!-- Thermal Imager Camera (Right) -->
@@ -830,8 +869,8 @@
             🎛️ Інтерактивний симулятор: Похибка безконтактного вимірювання
           </h3>
           <p style="font-size: 13px; color: var(--text-muted);">
-            Змінюйте параметри стінки чашки та коефіцієнт випромінювання $\varepsilon$, щоб побачити, як формується різниця
-            між показами термопари ($T_3$) та тепловізора ($T_2$):
+            Змінюйте температуру води й повітря та коефіцієнт випромінювання $\varepsilon$, щоб побачити, як формується різниця
+            між показами термопари ($T_3$) та тепловізора ($T_2$). Перепад температури на керамічній стінці прийнято сталим — 2.5 °C.
           </p>
 
           <div class="slider-group">
@@ -844,11 +883,12 @@
 
           <div class="slider-group">
             <div class="slider-header">
-              <span>Перепад температури на стінці чашки ($\Delta T_{\text{стінки}}$):</span>
-              <span class="slider-val" id="simWallDropVal">2.5 °C</span>
+              <span>Температура повітря в кімнаті ($T_{\text{навк}}$):</span>
+              <span class="slider-val" id="simAmbVal">20.0 °C</span>
             </div>
-            <input type="range" id="simWallDropInput" min="0" max="10" step="0.5" value="2.5" />
+            <input type="range" id="simAmbInput" min="0" max="40" step="0.5" value="20" />
           </div>
+
 
           <div class="slider-group">
             <div class="slider-header">
@@ -857,10 +897,10 @@
             </div>
             <input type="range" id="simEpsRealInput" min="0.15" max="0.98" step="0.01" value="0.88" />
             <div class="preset-btns">
-              <button class="preset-btn" data-eps="0.94" data-drop="2.0">Матова кераміка ($\varepsilon=0.94$)</button>
-              <button class="preset-btn" data-eps="0.86" data-drop="2.5">Глянцева глазур ($\varepsilon=0.86$)</button>
-              <button class="preset-btn" data-eps="0.60" data-drop="1.5">Світла емаль ($\varepsilon=0.60$)</button>
-              <button class="preset-btn" data-eps="0.22" data-drop="0.5">Полірована сталь ($\varepsilon=0.22$)</button>
+              <button class="preset-btn" data-eps="0.94">Матова кераміка ($\varepsilon=0.94$)</button>
+              <button class="preset-btn" data-eps="0.86">Глянцева глазур ($\varepsilon=0.86$)</button>
+              <button class="preset-btn" data-eps="0.60">Світла емаль ($\varepsilon=0.60$)</button>
+              <button class="preset-btn" data-eps="0.22">Полірована сталь ($\varepsilon=0.22$)</button>
             </div>
           </div>
 
@@ -869,7 +909,7 @@
               <span>Встановлений у налаштуваннях тепловізора $\varepsilon_{\text{камери}}$:</span>
               <span class="slider-val" id="simEpsCamVal">0.95</span>
             </div>
-            <input type="range" id="simEpsCamInput" min="0.50" max="1.00" step="0.01" value="0.95" />
+            <input type="range" id="simEpsCamInput" min="0.10" max="1.00" step="0.01" value="0.95" />
           </div>
 
           <div class="sim-readouts">
@@ -990,12 +1030,16 @@
 
       // Interactive Emissivity Simulator in Section 2
       const simWaterInput = document.getElementById('simWaterInput');
-      const simWallDropInput = document.getElementById('simWallDropInput');
       const simEpsRealInput = document.getElementById('simEpsRealInput');
       const simEpsCamInput = document.getElementById('simEpsCamInput');
 
+      const simAmbInput = document.getElementById('simAmbInput');
+      const simAmbVal = document.getElementById('simAmbVal');
+      const svgAmbText = document.getElementById('svgAmbText');
+
+      const WALL_DROP = 2.5; // °C, fixed temperature drop across the ceramic wall
+
       const simWaterVal = document.getElementById('simWaterVal');
-      const simWallDropVal = document.getElementById('simWallDropVal');
       const simEpsRealVal = document.getElementById('simEpsRealVal');
       const simEpsCamVal = document.getElementById('simEpsCamVal');
 
@@ -1012,11 +1056,10 @@
 
       function updateSimulator() {
         const tWater = parseFloat(simWaterInput.value);
-        const wallDrop = parseFloat(simWallDropInput.value);
         const epsReal = parseFloat(simEpsRealInput.value);
         const epsCam = parseFloat(simEpsCamInput.value);
-        const tAmb = 20.0;
-
+        const tAmb = parseFloat(simAmbInput.value);
+        const wallDrop = WALL_DROP;
         const tSurf = tWater - wallDrop;
 
         // Radiometric calculation in Kelvin
@@ -1028,40 +1071,63 @@
 
         // Camera assumes emissivity = epsCam and compensates (1 - epsCam)*T_amb^4
         const camObjRad = (totalRad - (1 - epsCam) * Math.pow(tAmbK, 4)) / epsCam;
-        const tCamK = Math.pow(Math.max(100, camObjRad), 0.25);
-        const tCam = tCamK - 273.15;
+        // Typical measuring range of a handheld thermal camera. With a wrong (low) ε the
+        // computed radiance can be negative or absurd — a real camera shows "out of range".
+        const CAM_MIN = -20, CAM_MAX = 650;
+        const tCamRaw = camObjRad > 0 ? Math.pow(camObjRad, 0.25) - 273.15 : -Infinity;
+        const outOfRange = tCamRaw < CAM_MIN ? 'low' : (tCamRaw > CAM_MAX ? 'high' : null);
+        const tCam = Math.max(CAM_MIN, Math.min(CAM_MAX, tCamRaw));
 
         const totalDiff = tWater - tCam;
         const opticalDiff = tSurf - tCam;
 
         simWaterVal.textContent = `${tWater.toFixed(1)} °C`;
-        simWallDropVal.textContent = `${wallDrop.toFixed(1)} °C`;
+        simAmbVal.textContent = `${tAmb.toFixed(1)} °C`;
         simEpsRealVal.textContent = epsReal.toFixed(2);
         simEpsCamVal.textContent = epsCam.toFixed(2);
 
         outThermocouple.textContent = `${tWater.toFixed(1)} °C`;
         outSurface.textContent = `${tSurf.toFixed(1)} °C`;
-        outCamera.textContent = `${tCam.toFixed(1)} °C`;
+        const camText = outOfRange === 'low' ? `< ${CAM_MIN} °C`
+          : outOfRange === 'high' ? `> ${CAM_MAX} °C`
+          : `${tCam.toFixed(1)} °C`;
+        outCamera.textContent = camText;
+
+        if (outOfRange) {
+          outTotalError.textContent = 'поза діапазоном';
+          outErrorBreakdown.textContent =
+            `Розрахункова температура виходить за діапазон тепловізора (${CAM_MIN}…${CAM_MAX} °C) — камера показала б «поза діапазоном». ` +
+            `Причина — сильна невідповідність ε (${epsReal.toFixed(2)} vs ${epsCam.toFixed(2)}) разом із фоном кімнати (${tAmb.toFixed(1)} °C).`;
+          svgCameraReadText.textContent = camText;
+        }
 
         const sign = totalDiff >= 0 ? '+' : '';
-        outTotalError.textContent = `${sign}${totalDiff.toFixed(1)} °C`;
-        outErrorBreakdown.textContent =
-          `Із них ${wallDrop.toFixed(1)} °C — через термічний опір стінки чашки, та ${opticalDiff.toFixed(1)} °C — оптична похибка невідповідності ε (${epsReal.toFixed(2)} vs ${epsCam.toFixed(2)}) і відбиття фону кімнати (20 °C).`;
+        if (!outOfRange) outTotalError.textContent = `${sign}${totalDiff.toFixed(1)} °C`;
+        if (!outOfRange) outErrorBreakdown.textContent =
+          `Із них ${wallDrop.toFixed(1)} °C — через термічний опір стінки чашки, та ${opticalDiff.toFixed(1)} °C — оптична похибка невідповідності ε (${epsReal.toFixed(2)} vs ${epsCam.toFixed(2)}) і відбиття фону кімнати (${tAmb.toFixed(1)} °C).`;
 
-        svgWaterTempText.textContent = `T₃ = ${tWater.toFixed(1)} °C`;
-        svgWallDropText.textContent = `ΔT_ст = −${wallDrop.toFixed(1)} °C`;
+        // SVG text can't use KaTeX — build T with a subscript via <tspan>.
+        svgWaterTempText.innerHTML = `<tspan class="mv">T</tspan><tspan class="ms" dy="3">3</tspan><tspan dy="-3"> = ${tWater.toFixed(1)} °C</tspan>`;
+        svgWallDropText.innerHTML = `<tspan class="mm">Δ</tspan><tspan class="mv">T</tspan><tspan class="ms" dy="3">ст</tspan><tspan dy="-3"> = −${wallDrop.toFixed(1)} °C</tspan>`;
+        svgAmbText.innerHTML = `Оточення кімнати (<tspan class="mv">T</tspan><tspan class="ms" dy="3">навк</tspan><tspan dy="-3"> = ${tAmb.toFixed(1)} °C)</tspan>`;
         svgSurfaceTempText.textContent = `Зовн. стінка: ${tSurf.toFixed(1)} °C`;
-        svgCameraReadText.textContent = `${tCam.toFixed(1)} °C`;
+        svgCameraReadText.textContent = camText;
       }
 
-      [simWaterInput, simWallDropInput, simEpsRealInput, simEpsCamInput].forEach(inp => {
+      const presetBtns = document.querySelectorAll('.preset-btn');
+      const clearPresetHighlight = () => presetBtns.forEach((b) => b.classList.remove('active'));
+
+      [simWaterInput, simAmbInput, simEpsRealInput, simEpsCamInput].forEach(inp => {
         inp.addEventListener('input', updateSimulator);
       });
+      // Manually changing material parameters means it's no longer the preset.
+      simEpsRealInput.addEventListener('input', clearPresetHighlight);
 
-      document.querySelectorAll('.preset-btn').forEach(btn => {
+      presetBtns.forEach(btn => {
         btn.addEventListener('click', () => {
           simEpsRealInput.value = btn.dataset.eps;
-          simWallDropInput.value = btn.dataset.drop;
+          clearPresetHighlight();
+          btn.classList.add('active');
           updateSimulator();
         });
       });
@@ -1079,6 +1145,23 @@
       }
 
       window.addEventListener('load', renderAllMath);
+
+      // Stack SVG superscripts above the preceding subscript (like LaTeX T_{навк}^4).
+      function stackSvgSuperscripts() {
+        document.querySelectorAll('svg .sup-stack').forEach((sup) => {
+          const sub = sup.previousElementSibling;
+          if (sub && sub.getComputedTextLength) {
+            const subW = sub.getComputedTextLength();
+            sup.setAttribute('dx', String(-subW));
+            // Text after the superscript continues after the (wider) subscript.
+            const next = sup.nextElementSibling;
+            if (next) next.setAttribute('dx', String(Math.max(0, subW - sup.getComputedTextLength())));
+          }
+        });
+      }
+      stackSvgSuperscripts();
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(stackSvgSuperscripts);
+
       updateSimulator();
       renderAllMath();
 
@@ -1115,6 +1198,25 @@
 
         // Show the header again when keyboard focus lands in it.
         topNav.addEventListener('focusin', () => topNav.classList.remove('nav-hidden'));
+
+        // Sticky visualizations: sit below the header when it is visible, at the very top when hidden.
+        const GAP = 16;
+        const stages = document.querySelectorAll('.grid-2col > .anim-stage');
+        const syncStickyTop = () => {
+          const hidden = topNav.classList.contains('nav-hidden');
+          const top = hidden ? GAP : topNav.offsetHeight + GAP;
+          document.documentElement.style.setProperty('--sticky-top', `${top}px`);
+          // Only stick if the whole stage fits; otherwise its bottom would be unreachable.
+          stages.forEach((st) => {
+            const fits = st.offsetHeight <= window.innerHeight - top - GAP;
+            const shorterThanNeighbour = st.offsetHeight < st.parentElement.offsetHeight - 40;
+            st.classList.toggle('sticky-ok', fits && shorterThanNeighbour);
+          });
+        };
+        new MutationObserver(syncStickyTop).observe(topNav, { attributes: true, attributeFilter: ['class'] });
+        window.addEventListener('resize', syncStickyTop);
+        window.addEventListener('load', syncStickyTop);
+        syncStickyTop();
       }
     })();
   </script>
