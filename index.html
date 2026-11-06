@@ -1105,6 +1105,66 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* HIDDEN FEATURE: LIVE CAMERA (enabled via ?camera URL parameter) */
+    .camera-panel {
+      flex: 1;
+      min-height: 0;
+      display: none;
+      flex-direction: column;
+    }
+
+    body.camera-mode .camera-panel { display: flex; }
+    body.camera-mode .chart-panel { display: none; }
+
+    .camera-toggle-btn { display: none; }
+    body.camera-enabled .camera-toggle-btn { display: inline-flex; }
+
+    .camera-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .camera-video-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #cameraVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    #cameraVideo.mirrored { transform: scaleX(-1); }
+
+    .camera-message {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      color: #ddd;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .camera-message.visible { display: flex; }
+
+    @media (max-width: 1100px) {
+      .camera-video-wrap { min-height: 340px; }
+    }
   </style>
 </head>
 <body>
@@ -1271,6 +1331,7 @@
             <span style="font-size: 11.5px; color: var(--text-muted);">
               Суцільні — виміри | Пунктирні — тренд $T(t) = T_{\text{навк}} + \Delta T_0 \cdot e^{-k \cdot t}$
             </span>
+            <button class="btn btn-outline camera-toggle-btn" id="showCameraBtn" title="Показати камеру (Alt+C)">📷 Камера</button>
           </div>
 
           <div class="chart-legend-bar">
@@ -1298,6 +1359,24 @@
           <div class="chart-canvas-wrap" id="chartContainer">
             <canvas id="tempChart"></canvas>
             <div class="chart-tooltip" id="chartTooltip"></div>
+          </div>
+        </div>
+
+        <!-- HIDDEN FEATURE: LIVE CAMERA (shown instead of chart when URL has ?camera) -->
+        <div class="panel camera-panel" id="cameraPanel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>Камера — live</span>
+            </div>
+            <div class="camera-controls">
+              <button class="btn btn-outline" id="showChartBtn" title="Показати графік (Alt+C)">📈 Графік</button>
+              <button class="btn btn-outline" id="cameraMirrorBtn" title="Дзеркально відобразити зображення">⇋</button>
+              <button class="btn btn-outline" id="cameraFullscreenBtn" title="На весь екран">⛶</button>
+            </div>
+          </div>
+          <div class="camera-video-wrap" id="cameraVideoWrap">
+            <video id="cameraVideo" autoplay playsinline muted></video>
+            <div class="camera-message" id="cameraMessage"></div>
           </div>
         </div>
 
@@ -2811,6 +2890,145 @@
       recalculateAndDraw();
       startTimerLoop();
       initMathRendering();
+    })();
+  </script>
+  <script>
+    // HIDDEN FEATURE: live webcam instead of the chart. Enable with ?camera (or ?camera=1).
+    // Switch chart <-> camera with the header buttons or Alt+C.
+    // The camera source itself is chosen in the browser (Chrome: camera icon in the address bar).
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has('camera') || ['0', 'false', 'off'].includes(params.get('camera'))) return;
+
+      const MIRROR_KEY = 'thermo_lab_camera_mirror';
+
+      const video = document.getElementById('cameraVideo');
+      const message = document.getElementById('cameraMessage');
+      const mirrorBtn = document.getElementById('cameraMirrorBtn');
+      const fullscreenBtn = document.getElementById('cameraFullscreenBtn');
+      const videoWrap = document.getElementById('cameraVideoWrap');
+      const showCameraBtn = document.getElementById('showCameraBtn');
+      const showChartBtn = document.getElementById('showChartBtn');
+
+      document.body.classList.add('camera-enabled');
+
+      let currentStream = null;
+
+      function store(key, value) {
+        try { localStorage.setItem(key, value); } catch (e) { /* ignore */ }
+      }
+      function recall(key) {
+        try { return localStorage.getItem(key); } catch (e) { return null; }
+      }
+
+      function showMessage(text) {
+        message.textContent = text;
+        message.classList.toggle('visible', !!text);
+      }
+
+      function isStreamAlive() {
+        const track = currentStream && currentStream.getVideoTracks()[0];
+        return !!track && track.readyState === 'live';
+      }
+
+      function stopStream() {
+        if (currentStream) {
+          currentStream.getTracks().forEach((t) => t.stop());
+          currentStream = null;
+        }
+        video.srcObject = null;
+      }
+
+      async function startStream() {
+        if (isStreamAlive()) return;
+        stopStream();
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          showMessage('Доступ до камери недоступний. Відкрийте сторінку через HTTPS або localhost.');
+          return;
+        }
+        showMessage('Підключення до камери…');
+        try {
+          currentStream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: { width: { ideal: 1920 }, height: { ideal: 1080 } }
+          });
+          // Mode may have been switched back to chart while waiting for permission.
+          if (!document.body.classList.contains('camera-mode')) {
+            stopStream();
+            return;
+          }
+          video.srcObject = currentStream;
+          showMessage('');
+          const track = currentStream.getVideoTracks()[0];
+          if (track) {
+            track.addEventListener('ended', () => {
+              if (document.body.classList.contains('camera-mode')) {
+                showMessage('Камеру відключено. Оберіть камеру в налаштуваннях браузера або підключіть її знову.');
+              }
+            });
+          }
+        } catch (err) {
+          const reason = err.name === 'NotAllowedError'
+            ? 'Доступ до камери заборонено. Дозвольте його в налаштуваннях браузера.'
+            : err.name === 'NotReadableError'
+              ? 'Камера зайнята іншою програмою.'
+              : err.name === 'NotFoundError'
+                ? 'Камер не знайдено. Підключіть камеру.'
+                : 'Не вдалося підключити камеру: ' + (err.message || err.name);
+          showMessage(reason);
+        }
+      }
+
+      function setMode(camera) {
+        document.body.classList.toggle('camera-mode', camera);
+        if (camera) {
+          startStream();
+        } else {
+          if (document.fullscreenElement === videoWrap) document.exitFullscreen().catch(() => {});
+          stopStream();
+          // Chart was hidden (zero size) — trigger its resize-based redraw.
+          window.dispatchEvent(new Event('resize'));
+        }
+      }
+
+      function toggleMode() {
+        setMode(!document.body.classList.contains('camera-mode'));
+      }
+
+      showCameraBtn.addEventListener('click', () => setMode(true));
+      showChartBtn.addEventListener('click', () => setMode(false));
+
+      document.addEventListener('keydown', (e) => {
+        if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && e.code === 'KeyC') {
+          e.preventDefault();
+          toggleMode();
+        }
+      });
+
+      if (recall(MIRROR_KEY) === '1') video.classList.add('mirrored');
+      mirrorBtn.addEventListener('click', () => {
+        const on = video.classList.toggle('mirrored');
+        store(MIRROR_KEY, on ? '1' : '0');
+      });
+
+      fullscreenBtn.addEventListener('click', () => {
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        } else if (videoWrap.requestFullscreen) {
+          videoWrap.requestFullscreen().catch(() => {});
+        }
+      });
+
+      // Camera switched/reconnected (e.g. via Chrome's camera menu) — reconnect if the stream died.
+      if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+        navigator.mediaDevices.addEventListener('devicechange', () => {
+          if (document.body.classList.contains('camera-mode') && !isStreamAlive()) startStream();
+        });
+      }
+
+      window.addEventListener('pagehide', stopStream);
+
+      setMode(true);
     })();
   </script>
 </body>
