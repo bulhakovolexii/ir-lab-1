@@ -499,6 +499,42 @@
       color: var(--primary);
     }
 
+    .cam-settings {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--cyan);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .cam-settings-title {
+      font-size: 13.5px;
+      font-weight: 700;
+    }
+
+    .cam-settings-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .link-btn {
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--cyan-dark, #21899e);
+      background: none;
+      border: none;
+      padding: 0;
+      margin-left: 4px;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
     .preset-btn.active {
       border-color: var(--primary);
       background: var(--primary-soft);
@@ -904,12 +940,28 @@
             </div>
           </div>
 
-          <div class="slider-group">
-            <div class="slider-header">
-              <span>Встановлений у налаштуваннях тепловізора $\varepsilon_{\text{камери}}$:</span>
-              <span class="slider-val" id="simEpsCamVal">0.95</span>
+          <div class="cam-settings">
+            <div class="cam-settings-title">📷 Налаштування тепловізора</div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <span>Коефіцієнт випромінювання $\varepsilon_{\text{камери}}$:</span>
+                <span class="slider-val" id="simEpsCamVal">0.95</span>
+              </div>
+              <input type="range" id="simEpsCamInput" min="0.10" max="1.00" step="0.01" value="0.95" />
             </div>
-            <input type="range" id="simEpsCamInput" min="0.10" max="1.00" step="0.01" value="0.95" />
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <span>Відбита температура $T_{\text{відб}}$:</span>
+                <span class="slider-val" id="simReflVal">20.0 °C</span>
+              </div>
+              <input type="range" id="simReflInput" min="0" max="40" step="0.5" value="20" />
+              <div class="cam-settings-note">
+                Температура фону, яку камера віднімає як відбите випромінювання. Правильно — виставити рівною $T_{\text{навк}}$.
+                <button type="button" class="link-btn" id="simReflSyncBtn">Як у кімнаті</button>
+              </div>
+            </div>
           </div>
 
           <div class="sim-readouts">
@@ -1042,6 +1094,9 @@
       const simWaterVal = document.getElementById('simWaterVal');
       const simEpsRealVal = document.getElementById('simEpsRealVal');
       const simEpsCamVal = document.getElementById('simEpsCamVal');
+      const simReflInput = document.getElementById('simReflInput');
+      const simReflVal = document.getElementById('simReflVal');
+      const simReflSyncBtn = document.getElementById('simReflSyncBtn');
 
       const outThermocouple = document.getElementById('outThermocouple');
       const outSurface = document.getElementById('outSurface');
@@ -1059,6 +1114,7 @@
         const epsReal = parseFloat(simEpsRealInput.value);
         const epsCam = parseFloat(simEpsCamInput.value);
         const tAmb = parseFloat(simAmbInput.value);
+        const tRefl = parseFloat(simReflInput.value); // camera setting
         const wallDrop = WALL_DROP;
         const tSurf = tWater - wallDrop;
 
@@ -1069,8 +1125,10 @@
         // Total infrared radiance reaching sensor (normalized by sigma)
         const totalRad = epsReal * Math.pow(tSurfK, 4) + (1 - epsReal) * Math.pow(tAmbK, 4);
 
-        // Camera assumes emissivity = epsCam and compensates (1 - epsCam)*T_amb^4
-        const camObjRad = (totalRad - (1 - epsCam) * Math.pow(tAmbK, 4)) / epsCam;
+        // Camera uses its own settings: emissivity epsCam and reflected temperature tRefl,
+        // and subtracts (1 - epsCam)*T_refl^4 as the reflected background.
+        const tReflK = tRefl + 273.15;
+        const camObjRad = (totalRad - (1 - epsCam) * Math.pow(tReflK, 4)) / epsCam;
         // Typical measuring range of a handheld thermal camera. With a wrong (low) ε the
         // computed radiance can be negative or absurd — a real camera shows "out of range".
         const CAM_MIN = -20, CAM_MAX = 650;
@@ -1085,6 +1143,7 @@
         simAmbVal.textContent = `${tAmb.toFixed(1)} °C`;
         simEpsRealVal.textContent = epsReal.toFixed(2);
         simEpsCamVal.textContent = epsCam.toFixed(2);
+        simReflVal.textContent = `${tRefl.toFixed(1)} °C`;
 
         outThermocouple.textContent = `${tWater.toFixed(1)} °C`;
         outSurface.textContent = `${tSurf.toFixed(1)} °C`;
@@ -1097,14 +1156,14 @@
           outTotalError.textContent = 'поза діапазоном';
           outErrorBreakdown.textContent =
             `Розрахункова температура виходить за діапазон тепловізора (${CAM_MIN}…${CAM_MAX} °C) — камера показала б «поза діапазоном». ` +
-            `Причина — сильна невідповідність ε (${epsReal.toFixed(2)} vs ${epsCam.toFixed(2)}) разом із фоном кімнати (${tAmb.toFixed(1)} °C).`;
+            `Причина — невідповідність налаштувань камери: ε ${epsCam.toFixed(2)} (дійсне ${epsReal.toFixed(2)}), T_відб ${tRefl.toFixed(1)} °C (у кімнаті ${tAmb.toFixed(1)} °C).`;
           svgCameraReadText.textContent = camText;
         }
 
         const sign = totalDiff >= 0 ? '+' : '';
         if (!outOfRange) outTotalError.textContent = `${sign}${totalDiff.toFixed(1)} °C`;
         if (!outOfRange) outErrorBreakdown.textContent =
-          `Із них ${wallDrop.toFixed(1)} °C — через термічний опір стінки чашки, та ${opticalDiff.toFixed(1)} °C — оптична похибка невідповідності ε (${epsReal.toFixed(2)} vs ${epsCam.toFixed(2)}) і відбиття фону кімнати (${tAmb.toFixed(1)} °C).`;
+          `Із них ${wallDrop.toFixed(1)} °C — через термічний опір стінки чашки, та ${opticalDiff.toFixed(1)} °C — оптична похибка налаштувань камери: ε ${epsCam.toFixed(2)} (дійсне ${epsReal.toFixed(2)}), T_відб ${tRefl.toFixed(1)} °C (у кімнаті ${tAmb.toFixed(1)} °C).`;
 
         // SVG text can't use KaTeX — build T with a subscript via <tspan>.
         svgWaterTempText.innerHTML = `<tspan class="mv">T</tspan><tspan class="ms" dy="3">3</tspan><tspan dy="-3"> = ${tWater.toFixed(1)} °C</tspan>`;
@@ -1117,7 +1176,12 @@
       const presetBtns = document.querySelectorAll('.preset-btn');
       const clearPresetHighlight = () => presetBtns.forEach((b) => b.classList.remove('active'));
 
-      [simWaterInput, simAmbInput, simEpsRealInput, simEpsCamInput].forEach(inp => {
+      simReflSyncBtn.addEventListener('click', () => {
+        simReflInput.value = simAmbInput.value;
+        updateSimulator();
+      });
+
+      [simWaterInput, simAmbInput, simEpsRealInput, simEpsCamInput, simReflInput].forEach(inp => {
         inp.addEventListener('input', updateSimulator);
       });
       // Manually changing material parameters means it's no longer the preset.
