@@ -3391,7 +3391,7 @@
       const params = new URLSearchParams(window.location.search);
       const teacherMode = params.has('camera') && !['0', 'false', 'off'].includes(params.get('camera'));
       // Broadcast server host. Set with stream/set-server.sh; '' = no broadcast (no requests at all).
-      const BROADCAST_SERVER = '';
+      const BROADCAST_SERVER = '157-180-95-21.sslip.io';
       const STREAM_URL = params.get('stream') || (BROADCAST_SERVER ? `https://${BROADCAST_SERVER}/live/whep` : '');
       const BROADCAST = '__broadcast__';
       const BROADCAST_LABEL = 'Трансляція викладача';
